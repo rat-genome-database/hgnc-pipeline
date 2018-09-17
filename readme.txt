@@ -1,0 +1,8 @@
+ver 1.1.1 as of Sep 20, 2017
+  ObsoleteHgncIdManager: downloads the input file in compressed format to conserve disk space
+
+ver 1.1 as of Jan 20, 2017
+  migrated from ANT to GRADLE
+  replaced 'Entrez' with 'NCBIGene'
+
+released ObsoleteHgncIdManager ver 1.0 as of Oct 10, 2016

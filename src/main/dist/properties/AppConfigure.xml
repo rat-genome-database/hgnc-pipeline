@@ -1,0 +1,28 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="manager" class="edu.mcw.rgd.pipelines.hgnc.Manager">
+        <property name="version" value="Version 1.1.2 as of Sep 17, 2018" />
+        <property name="dao" ref="dao" />
+        <property name="preProcessor" ref="preProcessor" />
+        <property name="qcProcessor" ref="qcProcessor" />
+        <property name="loadProcessor" ref="loadProcessor" />
+	</bean>
+	
+    <bean id="dao" class="edu.mcw.rgd.pipelines.hgnc.Dao">
+    </bean>
+
+    <bean id="preProcessor" class="edu.mcw.rgd.pipelines.hgnc.PreProcessor">
+        <property name="genesFile" value="http://www.genenames.org/cgi-bin/vdoc/genefam_list.pl" />
+    </bean>
+
+    <bean id="qcProcessor" class="edu.mcw.rgd.pipelines.hgnc.QCProcessor">
+    </bean>
+
+    <bean id="loadProcessor" class="edu.mcw.rgd.pipelines.hgnc.LoadProcessor">
+    </bean>
+
+    <bean id="obsoleteHgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.ObsoleteHgncIdManager">
+        <property name="version" value="ObsoleteHgncIdManager Version 1.0.1 as of Sep 20, 2017" />
+        <property name="obsoleteHgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/withdrawn.txt"/>
+    </bean>
+</beans>
