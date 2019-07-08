@@ -68,9 +68,12 @@ public class ObsoleteHgncIdManager {
         System.out.println(" -- withdrawn HGNC ids: "+withdrawnHgncIdsProcessed);
         System.out.println(" -- merged HGNC ids: "+mergedHgncIdsProcessed);
 
-        System.out.println("HGNC ID deleted from RGD db: "+hgncIdsDeletedInRgd);
-        System.out.println("HGNC ID replaced in RGD db: "+hgncIdsReplacedInRgd);
-
+        if( hgncIdsDeletedInRgd!=0 ) {
+            System.out.println("HGNC ID deleted from RGD db: " + hgncIdsDeletedInRgd);
+        }
+        if( hgncIdsReplacedInRgd!=0 ) {
+            System.out.println("HGNC ID replaced in RGD db: " + hgncIdsReplacedInRgd);
+        }
         System.out.println("Processing of obsolete HGNC ids complete: "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
     }
 

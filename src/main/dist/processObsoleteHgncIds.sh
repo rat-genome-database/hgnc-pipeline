@@ -1,2 +1,2 @@
 # process obsolete HGNC ids
-/home/rgddata/pipelines/HgncPipeline/run.sh --processObsoleteHgncIds
+/home/rgddata/pipelines/HgncPipeline/_run.sh --processObsoleteHgncIds

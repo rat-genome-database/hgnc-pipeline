@@ -1,3 +1,6 @@
+2019-07-08
+  ObsoleteHgncIdManager: improved logging
+
 ver 1.1.1 as of Sep 20, 2017
   ObsoleteHgncIdManager: downloads the input file in compressed format to conserve disk space
 
