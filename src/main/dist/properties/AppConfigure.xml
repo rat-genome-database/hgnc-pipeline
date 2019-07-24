@@ -22,7 +22,7 @@
     </bean>
 
     <bean id="obsoleteHgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.ObsoleteHgncIdManager">
-        <property name="version" value="ObsoleteHgncIdManager  build 2019-07-08" />
+        <property name="version" value="ObsoleteHgncIdManager  build 2019-07-24" />
         <property name="obsoleteHgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/withdrawn.txt"/>
     </bean>
 </beans>
