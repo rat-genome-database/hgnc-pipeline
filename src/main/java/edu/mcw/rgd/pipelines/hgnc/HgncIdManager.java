@@ -20,6 +20,7 @@ public class HgncIdManager {
     private String hgncIdFile;
     private String dogVgncIdFile;
     private String pigVgncIdFile;
+    private int refKey;
     private Dao dao = new Dao();
     private int nomenEvents = 0;
     Logger logDb = Logger.getLogger("hgnc_ids");
@@ -96,7 +97,7 @@ public class HgncIdManager {
             event.setRgdId(gene.getRgdId());
             event.setSymbol(gene.getSymbol());
             event.setName(gene.getName());
-            event.setRefKey("133851");
+            event.setRefKey(String.valueOf(getRefKey()));
             event.setNomenStatusType("PROVISIONAL");
             event.setDesc("Symbol and/or name change");
             event.setEventDate(new Date());
@@ -153,5 +154,13 @@ public class HgncIdManager {
 
     public void setPigVgncIdFile(String pigVgncIdFile) {
         this.pigVgncIdFile = pigVgncIdFile;
+    }
+
+    public int getRefKey() {
+        return refKey;
+    }
+
+    public void setRefKey(int refKey) {
+        this.refKey = refKey;
     }
 }

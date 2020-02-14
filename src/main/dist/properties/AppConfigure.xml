@@ -30,5 +30,6 @@
         <property name="hgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt"/>
         <property name="dogVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/dog/dog_vgnc_gene_set_All.txt"/>
         <property name="pigVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/pig/pig_vgnc_gene_set_All.txt"/>
+        <property name="refKey" value="133499" />
     </bean>
 </beans>
