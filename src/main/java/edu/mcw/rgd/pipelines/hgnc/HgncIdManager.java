@@ -89,7 +89,7 @@ public class HgncIdManager {
 
         dao.updateGene(gene);
 
-        if(!oldSymbol.equalsIgnoreCase(gene.getSymbol()) || (oldName != null || !oldName.equalsIgnoreCase(gene.getName()))) {
+        if(!oldSymbol.equalsIgnoreCase(gene.getSymbol()) || (oldName != null && !oldName.equalsIgnoreCase(gene.getName()))) {
             nomenEvents++;
 
 
