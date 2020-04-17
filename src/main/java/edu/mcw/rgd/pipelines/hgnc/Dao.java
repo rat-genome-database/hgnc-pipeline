@@ -1,8 +1,13 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
-import edu.mcw.rgd.dao.impl.XdbIdDAO;
+import edu.mcw.rgd.dao.AbstractDAO;
+import edu.mcw.rgd.dao.impl.*;
+import edu.mcw.rgd.dao.spring.GeneQuery;
+import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.datamodel.XdbId;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +17,16 @@ import java.util.List;
  * @since 12/22/11
  * Dao to handle database access
  */
-public class Dao {
+public class Dao extends AbstractDAO{
 
     private XdbIdDAO xdbIdDAO = new XdbIdDAO();
+    private NomenclatureDAO nomenclatureDAO = new NomenclatureDAO();
+    private AliasDAO aliasDAO = new AliasDAO();
+    private GeneDAO geneDAO = new GeneDAO();
+
+    Logger logAliases = Logger.getLogger("aliases");
 
     public Dao() {
-        System.out.println(xdbIdDAO.getConnectionInfo());
     }
 
     /**
@@ -101,5 +110,32 @@ public class Dao {
     public int deleteXdbIdsModifiedBefore(int xdbKey, String srcPipeline, java.util.Date modDate) throws Exception {
 
         return xdbIdDAO.deleteXdbIdsModifiedBefore(xdbKey, srcPipeline, modDate);
+    }
+
+    public void insertNomenclatureEvent(NomenclatureEvent event) throws Exception {
+        nomenclatureDAO.createNomenEvent(event);
+    }
+
+    public void updateGene(Gene gene) throws Exception {
+        geneDAO.updateGene(gene);
+    }
+
+    public void insertAlias(Alias alias) throws Exception {
+        aliasDAO.insertAlias(alias);
+        logAliases.debug("INSERT "+alias.dump("|"));
+    }
+
+    public List<Gene> getActiveGenesByNcbiId(String accId) throws Exception{
+        return getActiveGenesById(accId, XdbId.XDB_KEY_NCBI_GENE, "ENTREZGENE");
+    }
+
+    public List<Gene> getActiveGenesByEnsemblId(String accId) throws Exception {
+        return getActiveGenesById(accId, XdbId.XDB_KEY_ENSEMBL_GENES, "Ensembl");
+    }
+
+    List<Gene> getActiveGenesById(String accId, int xdbKey, String srcPipeline) throws Exception {
+        String sql = "SELECT DISTINCT g.*, r.species_type_key FROM genes g, rgd_ids r, rgd_acc_xdb x WHERE r.rgd_id=g.rgd_id AND x.rgd_id=g.rgd_id " +
+                "AND r.object_key = 1 AND x.XDB_KEY=? AND x.ACC_ID=? AND r.OBJECT_STATUS='ACTIVE' AND x.src_pipeline=?";
+        return  GeneQuery.execute(this,sql, xdbKey, accId, srcPipeline);
     }
 }

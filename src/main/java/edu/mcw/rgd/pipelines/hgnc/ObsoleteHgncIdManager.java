@@ -1,5 +1,6 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
+import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
@@ -108,6 +109,14 @@ public class ObsoleteHgncIdManager {
                 logDb.info("DROP RGD:"+id.getRgdId()+" "+obsoleteHgncId);
                 hgncIdsDeletedInRgd++;
             }
+
+            // create alias of type 'old_hgnc_id'
+            Alias alias = new Alias();
+            alias.setRgdId(id.getRgdId());
+            alias.setTypeName("old_hgnc_id");
+            alias.setValue(obsoleteHgncId);
+            alias.setNotes("created by ObsoleteHgncId pipeline");
+            dao.insertAlias(alias);
         }
     }
 
