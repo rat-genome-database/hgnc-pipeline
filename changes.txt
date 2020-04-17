@@ -1,3 +1,7 @@
+2020-04-17
+  obsoleteHgncIds: create aliases of type 'old_hgnc_id' whenever an HGNC ID has been replaced
+  cleanup: delete old code that never was completed
+
 2019-07-24
   updated commons-dbcp -> commons-dbcp2
 

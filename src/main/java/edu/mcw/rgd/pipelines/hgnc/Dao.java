@@ -3,11 +3,11 @@ package edu.mcw.rgd.pipelines.hgnc;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.GeneQuery;
-import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.datamodel.XdbId;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +24,7 @@ public class Dao extends AbstractDAO{
     private AliasDAO aliasDAO = new AliasDAO();
     private GeneDAO geneDAO = new GeneDAO();
 
-    public Dao() {
-    }
+    Logger logAliases = Logger.getLogger("aliases");
 
     /**
      * get active genes with given external id
@@ -82,52 +81,30 @@ public class Dao extends AbstractDAO{
         return xdbIdDAO.getXdbIds(xdbId);
     }
 
-    /**
-     * return count of rows for given xdb and pipeline modified before given date
-     *
-     * @param xdbKey xdb key
-     * @param srcPipeline source
-     * @param modDate modification date
-     * @return count of rows for given xdb and pipeline modified before given date
-     * @throws Exception when unexpected error in spring framework occurs
-     */
-    public int getCountOfXdbIdsModifiedBefore(int xdbKey, String srcPipeline, java.util.Date modDate) throws Exception {
-
-        return xdbIdDAO.getCountOfXdbIdsModifiedBefore(xdbKey, srcPipeline, modDate);
-    }
-
-    /**
-     * delete entries for given xdb and pipeline modified before given date
-     *
-     * @param xdbKey xdb key
-     * @param srcPipeline source
-     * @param modDate modification date
-     * @return count of rows deleted
-     * @throws Exception when unexpected error in spring framework occurs
-     */
-    public int deleteXdbIdsModifiedBefore(int xdbKey, String srcPipeline, java.util.Date modDate) throws Exception {
-
-        return xdbIdDAO.deleteXdbIdsModifiedBefore(xdbKey, srcPipeline, modDate);
-    }
-
     public void insertNomenclatureEvent(NomenclatureEvent event) throws Exception {
         nomenclatureDAO.createNomenEvent(event);
     }
+
     public void updateGene(Gene gene) throws Exception {
         geneDAO.updateGene(gene);
     }
+
     public void insertAlias(Alias alias) throws Exception {
         aliasDAO.insertAlias(alias);
+        logAliases.debug("INSERT "+alias.dump("|"));
     }
 
-    public List<Gene> getActiveGenesByNcbiId(String Acc_id) throws Exception{
-        String sql = "SELECT DISTINCT g.*, r.species_type_key FROM genes g, rgd_ids r, rgd_acc_xdb x where r.RGD_ID=g.RGD_ID AND x.RGD_ID=g.RGD_ID " +
-                "AND r.object_key = 1 AND x.XDB_KEY=? AND x.ACC_ID=? AND r.OBJECT_STATUS='ACTIVE' AND x.src_pipeline = 'ENTREZGENE'";
-        return  GeneQuery.execute(this,sql,XdbId.XDB_KEY_NCBI_GENE,Acc_id);
+    public List<Gene> getActiveGenesByNcbiId(String accId) throws Exception {
+        return getActiveGenesById(accId, XdbId.XDB_KEY_NCBI_GENE, "ENTREZGENE");
     }
-    public List<Gene> getActiveGenesByEnsemblId(String Acc_id) throws Exception{
-        String sql = " SELECT DISTINCT g.*, r.species_type_key FROM genes g, rgd_ids r, rgd_acc_xdb x where r.RGD_ID=g.RGD_ID AND x.RGD_ID=g.RGD_ID " +
-                "AND r.object_key = 1 AND x.XDB_KEY=? AND x.ACC_ID=? AND r.OBJECT_STATUS='ACTIVE' AND x.src_pipeline = 'Ensembl'";
-        return  GeneQuery.execute(this,sql,XdbId.XDB_KEY_ENSEMBL_GENES,Acc_id);
+
+    public List<Gene> getActiveGenesByEnsemblId(String accId) throws Exception {
+        return getActiveGenesById(accId, XdbId.XDB_KEY_ENSEMBL_GENES, "Ensembl");
+    }
+
+    List<Gene> getActiveGenesById(String accId, int xdbKey, String srcPipeline) throws Exception {
+        String sql = "SELECT DISTINCT g.*, r.species_type_key FROM genes g, rgd_ids r, rgd_acc_xdb x WHERE r.rgd_id=g.rgd_id AND x.rgd_id=g.rgd_id " +
+                "AND r.object_key = 1 AND x.XDB_KEY=? AND x.ACC_ID=? AND r.OBJECT_STATUS='ACTIVE' AND x.src_pipeline=?";
+        return  GeneQuery.execute(this,sql, xdbKey, accId, srcPipeline);
     }
 }

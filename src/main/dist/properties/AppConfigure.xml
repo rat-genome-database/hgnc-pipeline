@@ -1,30 +1,10 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-	<bean id="manager" class="edu.mcw.rgd.pipelines.hgnc.Manager">
-        <property name="version" value="Version 1.1.2 as of Sep 17, 2018" />
-        <property name="dao" ref="dao" />
-        <property name="preProcessor" ref="preProcessor" />
-        <property name="qcProcessor" ref="qcProcessor" />
-        <property name="loadProcessor" ref="loadProcessor" />
-	</bean>
-	
-    <bean id="dao" class="edu.mcw.rgd.pipelines.hgnc.Dao">
-    </bean>
-
-    <bean id="preProcessor" class="edu.mcw.rgd.pipelines.hgnc.PreProcessor">
-        <property name="genesFile" value="http://www.genenames.org/cgi-bin/vdoc/genefam_list.pl" />
-    </bean>
-
-    <bean id="qcProcessor" class="edu.mcw.rgd.pipelines.hgnc.QCProcessor">
-    </bean>
-
-    <bean id="loadProcessor" class="edu.mcw.rgd.pipelines.hgnc.LoadProcessor">
-    </bean>
-
     <bean id="obsoleteHgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.ObsoleteHgncIdManager">
-        <property name="version" value="ObsoleteHgncIdManager  build 2019-07-24" />
+        <property name="version" value="ObsoleteHgncIdManager  -- build 2020-04-17" />
         <property name="obsoleteHgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/withdrawn.txt"/>
     </bean>
+
     <bean id="hgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.HgncIdManager">
         <property name="version" value="HgncIdManager  build 2020-02-07" />
         <property name="hgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt"/>
