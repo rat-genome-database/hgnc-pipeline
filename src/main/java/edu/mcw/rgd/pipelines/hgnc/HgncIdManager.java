@@ -4,10 +4,8 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
-import sun.swing.BakedArrayList;
 
 import java.io.BufferedReader;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,9 +22,8 @@ public class HgncIdManager {
     private Dao dao = new Dao();
     private int nomenEvents = 0;
     Logger logDb = Logger.getLogger("hgnc_ids");
+
     public void run(int speciesTypeKey) throws Exception {
-
-
 
         logDb.info("Running "+ SpeciesType.getCommonName(speciesTypeKey)+" HGNC file");
 
@@ -89,9 +86,8 @@ public class HgncIdManager {
 
         dao.updateGene(gene);
 
-        if(!oldSymbol.equalsIgnoreCase(gene.getSymbol()) || (oldName != null || !oldName.equalsIgnoreCase(gene.getName()))) {
+        if(!oldSymbol.equalsIgnoreCase(gene.getSymbol()) || (oldName != null && !oldName.equalsIgnoreCase(gene.getName()))) {
             nomenEvents++;
-
 
             NomenclatureEvent event = new NomenclatureEvent();
             event.setRgdId(gene.getRgdId());

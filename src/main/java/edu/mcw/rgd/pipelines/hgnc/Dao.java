@@ -26,9 +26,6 @@ public class Dao extends AbstractDAO{
 
     Logger logAliases = Logger.getLogger("aliases");
 
-    public Dao() {
-    }
-
     /**
      * get active genes with given external id
      * @param xdbKey - external db key
@@ -84,34 +81,6 @@ public class Dao extends AbstractDAO{
         return xdbIdDAO.getXdbIds(xdbId);
     }
 
-    /**
-     * return count of rows for given xdb and pipeline modified before given date
-     *
-     * @param xdbKey xdb key
-     * @param srcPipeline source
-     * @param modDate modification date
-     * @return count of rows for given xdb and pipeline modified before given date
-     * @throws Exception when unexpected error in spring framework occurs
-     */
-    public int getCountOfXdbIdsModifiedBefore(int xdbKey, String srcPipeline, java.util.Date modDate) throws Exception {
-
-        return xdbIdDAO.getCountOfXdbIdsModifiedBefore(xdbKey, srcPipeline, modDate);
-    }
-
-    /**
-     * delete entries for given xdb and pipeline modified before given date
-     *
-     * @param xdbKey xdb key
-     * @param srcPipeline source
-     * @param modDate modification date
-     * @return count of rows deleted
-     * @throws Exception when unexpected error in spring framework occurs
-     */
-    public int deleteXdbIdsModifiedBefore(int xdbKey, String srcPipeline, java.util.Date modDate) throws Exception {
-
-        return xdbIdDAO.deleteXdbIdsModifiedBefore(xdbKey, srcPipeline, modDate);
-    }
-
     public void insertNomenclatureEvent(NomenclatureEvent event) throws Exception {
         nomenclatureDAO.createNomenEvent(event);
     }
@@ -125,7 +94,7 @@ public class Dao extends AbstractDAO{
         logAliases.debug("INSERT "+alias.dump("|"));
     }
 
-    public List<Gene> getActiveGenesByNcbiId(String accId) throws Exception{
+    public List<Gene> getActiveGenesByNcbiId(String accId) throws Exception {
         return getActiveGenesById(accId, XdbId.XDB_KEY_NCBI_GENE, "ENTREZGENE");
     }
 
