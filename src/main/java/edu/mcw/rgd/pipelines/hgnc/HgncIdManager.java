@@ -53,7 +53,7 @@ public class HgncIdManager {
             downloader.setExternalFile(getPigVgncIdFile());
         else downloader.setExternalFile(getHgncIdFile());
 
-        downloader.setLocalFile("data/hgnc_ids.txt");
+        downloader.setLocalFile("data/"+speciesName+"_hgnc_ids.txt");
         downloader.setPrependDateStamp(true);
         downloader.setUseCompression(true);
         String localFile = downloader.downloadNew();
