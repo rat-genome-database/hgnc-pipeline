@@ -61,6 +61,7 @@ public class HgncIdManager {
         int hgncIdsProcessed = 0;
         int conflictCount = 0;
         int nomenEvents = 0;
+        int genesModified = 0;
 
         BufferedReader reader = Utils.openReader(localFile);
         String line = reader.readLine(); // skip header line
@@ -89,13 +90,13 @@ public class HgncIdManager {
                 if( ncbiId != null ) {
                     existingGenes = dao.getActiveGenesByNcbiId(ncbiId);
                     if( existingGenes.size()==1 ) {
-                        matchBy = "match by NCBI:"+ncbiId;
+                        matchBy = "match by NCBI:"+ncbiId+" ("+acc+")";
                     }
                 }
                 if( existingGenes.size() != 1 && ensemblId != null ) {
                     existingGenes = dao.getActiveGenesByEnsemblId(ensemblId);
                     if (existingGenes.size() == 1) {
-                        matchBy = "match by " + ensemblId;
+                        matchBy = "match by " + ensemblId+" ("+acc+")";
                     }
                 }
             }
@@ -122,6 +123,7 @@ public class HgncIdManager {
                 if( updateGene(g, previousSymbol, previousName, matchBy) ) {
                     nomenEvents++;
                 }
+                genesModified++;
             }
         }
 
@@ -129,7 +131,8 @@ public class HgncIdManager {
 
         logDb.info("   Number of HGNC/VGNC ids in "+ speciesName+" the file: "+ hgncIdsProcessed);
         logDb.info("      out of which "+conflictCount+" did not match a single gene in RGD");
-        logDb.info("   Number of "+ speciesName+" Genes Updated: "+ nomenEvents);
+        logDb.info("   Number of "+ speciesName+" Genes Updated: "+ genesModified);
+        logDb.info("   Number of "+ speciesName+" Nomen Events created: "+ nomenEvents);
     }
 
     /** return true if a nomen event has been generated
