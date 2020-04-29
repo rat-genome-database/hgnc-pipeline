@@ -74,33 +74,52 @@ public class HgncIdManager {
             String ncbiId = cols[18];
             String ensemblId = cols[19];
 
+            String acc = (speciesTypeKey==SpeciesType.HUMAN ? "HGNC:" : "VGNC:") + hgncId;
+
+            String matchBy = "";
             List<Gene> existingGenes;
             if( speciesTypeKey==SpeciesType.HUMAN ) {
                 existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, hgncId);
             } else {
                 existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_VGNC, hgncId);
             }
-            if( existingGenes.size() != 1 ) {
+            if( existingGenes.size() == 1 ) {
+                matchBy = "match by "+acc;
+            } else {
                 if( ncbiId != null ) {
                     existingGenes = dao.getActiveGenesByNcbiId(ncbiId);
+                    if( existingGenes.size()==1 ) {
+                        matchBy = "match by NCBI:"+ncbiId;
+                    }
                 }
-                if( existingGenes.size() != 1 && ensemblId != null)
+                if( existingGenes.size() != 1 && ensemblId != null ) {
                     existingGenes = dao.getActiveGenesByEnsemblId(ensemblId);
+                    if (existingGenes.size() == 1) {
+                        matchBy = "match by " + ensemblId;
+                    }
+                }
             }
 
             if( existingGenes.size() != 1 ){
-                String acc = (speciesTypeKey==SpeciesType.HUMAN ? "HGNC:" : "VGNC:") + hgncId;
                 logDb.debug("   Genes not found/ Found with multiple Rgd IDs for " + acc);
                 conflictCount++;
             } else {
-                String previousSymbol = existingGenes.get(0).getSymbol();
-                String previousName = existingGenes.get(0).getName();
-
                 Gene g = existingGenes.get(0);
+                String previousSymbol = g.getSymbol();
+                String previousName = g.getName();
+
+                if( Utils.stringsAreEqual(symbol, previousSymbol)
+                    && Utils.stringsAreEqual(name, previousName)
+                    && Utils.stringsAreEqual(g.getNomenSource(), "HGNC") ) {
+
+                    // everything up-to-date: continue to next line
+                    continue;
+                }
+
                 g.setSymbol(symbol);
                 g.setName(name);
                 g.setNomenSource("HGNC");
-                if( updateGene(g,previousSymbol,previousName) ) {
+                if( updateGene(g, previousSymbol, previousName, matchBy) ) {
                     nomenEvents++;
                 }
             }
@@ -115,11 +134,11 @@ public class HgncIdManager {
 
     /** return true if a nomen event has been generated
      */
-    boolean updateGene(Gene gene, String oldSymbol, String oldName) throws Exception {
+    boolean updateGene(Gene gene, String oldSymbol, String oldName, String notes) throws Exception {
 
         dao.updateGene(gene);
 
-        if(!oldSymbol.equalsIgnoreCase(gene.getSymbol()) || (oldName != null && !oldName.equalsIgnoreCase(gene.getName()))) {
+        if( !Utils.stringsAreEqualIgnoreCase(gene.getSymbol(), oldSymbol) || !Utils.stringsAreEqualIgnoreCase(oldName, gene.getName()) ) {
             NomenclatureEvent event = new NomenclatureEvent();
             event.setRgdId(gene.getRgdId());
             event.setSymbol(gene.getSymbol());
@@ -131,6 +150,7 @@ public class HgncIdManager {
             event.setOriginalRGDId(gene.getRgdId());
             event.setPreviousName(oldName);
             event.setPreviousSymbol(oldSymbol);
+            event.setNotes(notes);
             dao.insertNomenclatureEvent(event);
 
             Alias aliasData = new Alias();
