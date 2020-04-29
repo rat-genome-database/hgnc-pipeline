@@ -29,9 +29,7 @@ public class Manager {
                     }
                     case "--processHgncIds": {
                         HgncIdManager manager = (HgncIdManager) (bf.getBean("hgncIdManager"));
-                        manager.run(SpeciesType.HUMAN);
-                        manager.run(SpeciesType.DOG);
-                        manager.run(SpeciesType.PIG);
+                        manager.run();
                         return;
                     }
                 }

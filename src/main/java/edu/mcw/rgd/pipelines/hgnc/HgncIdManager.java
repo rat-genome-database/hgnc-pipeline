@@ -5,6 +5,7 @@ import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 import java.io.BufferedReader;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -22,9 +23,28 @@ public class HgncIdManager {
     private int nomenEvents = 0;
     Logger logDb = Logger.getLogger("hgnc_ids");
 
+    public void run() throws Exception {
+
+        long startTime = System.currentTimeMillis();
+
+        logDb.info(getVersion());
+        logDb.info("   "+dao.getConnectionInfo());
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        logDb.info("   started at "+sdt.format(new Date(startTime)));
+
+        run(SpeciesType.HUMAN);
+        run(SpeciesType.DOG);
+        run(SpeciesType.PIG);
+
+        logDb.info("");
+        logDb.info("=== OK ===      elapsed "+Utils.formatElapsedTime(System.currentTimeMillis(), startTime));
+    }
+
     public void run(int speciesTypeKey) throws Exception {
 
-        logDb.info("Running "+ SpeciesType.getCommonName(speciesTypeKey)+" HGNC file");
+        String speciesName = SpeciesType.getCommonName(speciesTypeKey);
+        logDb.info("");
+        logDb.info(speciesName.toUpperCase()+" HGNC file processing ...");
 
         FileDownloader downloader = new FileDownloader();
         if(speciesTypeKey == SpeciesType.DOG)
@@ -35,10 +55,12 @@ public class HgncIdManager {
 
         downloader.setLocalFile("data/hgnc_ids.txt");
         downloader.setPrependDateStamp(true);
+        downloader.setUseCompression(true);
         String localFile = downloader.downloadNew();
 
-        System.out.println("Completed file download");
+        logDb.info("   file downloaded to "+localFile);
         int hgncIdsProcessed = 0;
+        int conflictCount = 0;
 
         BufferedReader reader = Utils.openReader(localFile);
         String line = reader.readLine(); // skip header line
@@ -52,16 +74,24 @@ public class HgncIdManager {
             String ncbiId = cols[18];
             String ensemblId = cols[19];
 
-            List<Gene> existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC,hgncId);
-            if(existingGenes.isEmpty() || existingGenes.size() != 1){
-                if(ncbiId != null )
+            List<Gene> existingGenes;
+            if( speciesTypeKey==SpeciesType.HUMAN ) {
+                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, hgncId);
+            } else {
+                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_VGNC, hgncId);
+            }
+            if( existingGenes.size() != 1 ) {
+                if( ncbiId != null ) {
                     existingGenes = dao.getActiveGenesByNcbiId(ncbiId);
-                if((existingGenes.isEmpty() || existingGenes.size() != 1) && ensemblId != null)
+                }
+                if( existingGenes.size() != 1 && ensemblId != null)
                     existingGenes = dao.getActiveGenesByEnsemblId(ensemblId);
             }
 
-            if(existingGenes.isEmpty() || existingGenes.size() != 1){
-                logDb.info("Genes not found/ Found with multiple Rgd IDs :" + hgncId);
+            if( existingGenes.size() != 1 ){
+                String acc = (speciesTypeKey==SpeciesType.HUMAN ? "HGNC:" : "VGNC:") + hgncId;
+                logDb.debug("   Genes not found/ Found with multiple Rgd IDs for " + acc);
+                conflictCount++;
             } else {
                 String previousSymbol = existingGenes.get(0).getSymbol();
                 String previousName = existingGenes.get(0).getName();
@@ -72,13 +102,13 @@ public class HgncIdManager {
                 g.setNomenSource("HGNC");
                 updateGene(g,previousSymbol,previousName);
             }
-
         }
 
         reader.close();
-        logDb.info("Number of Genes in "+ SpeciesType.getCommonName(speciesTypeKey)+" HGNC file: "+ hgncIdsProcessed);
-        logDb.info("Number of "+ SpeciesType.getCommonName(speciesTypeKey)+" Genes Updated: "+ nomenEvents);
 
+        logDb.info("   Number of HGNC/VGNC ids in "+ speciesName+" the file: "+ hgncIdsProcessed);
+        logDb.info("      out of which "+conflictCount+" did not match a single gene in RGD");
+        logDb.info("   Number of "+ speciesName+" Genes Updated: "+ nomenEvents);
     }
 
     void updateGene(Gene gene,String oldSymbol,String oldName) throws Exception {
@@ -114,9 +144,7 @@ public class HgncIdManager {
                 aliasData.setTypeName("old_gene_name");
                 dao.insertAlias(aliasData);
             }
-
         }
-
     }
 
     public void setVersion(String version) {

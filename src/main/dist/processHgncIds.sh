@@ -14,7 +14,7 @@ cd $APPDIR
 
 java -Dspring.config=$APPDIR/../properties/default_db2.xml \
     -Dlog4j.configuration=file://$APPDIR/properties/log4j.properties \
-    -jar lib/$APPNAME.jar --processHgncIds > logs/hgnc_ids.log
+    -jar lib/$APPNAME.jar --processHgncIds > $APPDIR/hgncIds.log
 
 
-mailx -s "[$SERVER] HgncDataPipeline OK!" $EMAILLIST < $APPDIR/logs/hgnc_ids.log
+mailx -s "[$SERVER] HgncDataPipeline OK!" $EMAILLIST < $APPDIR/logs/hgnc_ids_summary.log
