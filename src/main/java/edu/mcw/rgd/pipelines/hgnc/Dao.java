@@ -76,18 +76,18 @@ public class Dao extends AbstractDAO{
     public void insertNomenclatureEvent(NomenclatureEvent event) throws Exception {
         nomenclatureDAO.createNomenEvent(event);
         logNomenEvents.info("INSERTED "
-            +"KEY:"+event.getNomenEventKey()
-            +"REF_KEY:"+event.getRefKey()
-            +"EVENT_DATE:"+new Timestamp(event.getEventDate().getTime()).toString()
-            +"STATUS:"+event.getNomenStatusType()
-            +"DESC:"+event.getDesc()
-            +"RGD:"+event.getRgdId()
-            +"SYMBOL:"+event.getSymbol()
-            +"NAME:"+event.getName()
-            +"OLD_RGD:"+event.getOriginalRGDId()
-            +"OLD_SYMBOL:"+event.getPreviousSymbol()
-            +"OLD_NAME:"+event.getPreviousName()
-            +"NOTES:"+event.getNotes()
+            +" KEY:"+event.getNomenEventKey()
+            +" REF_KEY:"+event.getRefKey()
+            +" EVENT_DATE:"+new Timestamp(event.getEventDate().getTime()).toString()
+            +" STATUS:"+event.getNomenStatusType()
+            +" DESC:"+event.getDesc()
+            +" RGD:"+event.getRgdId()
+            +" SYMBOL:"+event.getSymbol()
+            +" NAME:"+event.getName()
+            +" OLD_RGD:"+event.getOriginalRGDId()
+            +" OLD_SYMBOL:"+event.getPreviousSymbol()
+            +" OLD_NAME:"+event.getPreviousName()
+            +" NOTES:"+event.getNotes()
         +"");
     }
 
