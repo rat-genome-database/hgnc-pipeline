@@ -2,7 +2,8 @@
   hgncIds: tweaked up logic for VGNC files; greatly improved summary email
      due to side effect, pipeline was processing human file for pig/dog
      fixed counts of nomen events for dog/pig
-
+     added logging of inserted nomen events
+     
 2020-04-17
   obsoleteHgncIds: create aliases of type 'old_hgnc_id' whenever an HGNC ID has been replaced
   cleanup: delete old code that never was completed

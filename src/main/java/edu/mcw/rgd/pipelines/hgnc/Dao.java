@@ -9,6 +9,7 @@ import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.datamodel.XdbId;
 import org.apache.log4j.Logger;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class Dao extends AbstractDAO{
     private GeneDAO geneDAO = new GeneDAO();
 
     Logger logAliases = Logger.getLogger("aliases");
+    Logger logNomenEvents = Logger.getLogger("nomen_events");
 
     /**
      * get active genes with given external id
@@ -60,16 +62,6 @@ public class Dao extends AbstractDAO{
     }
 
     /**
-     * insert an XdbId; duplicate entries are not inserted (with same RGD_ID,XDB_KEY,ACC_ID,SRC_PIPELINE)
-     * @param xdb XdbId object to be inserted
-     * @return number of actually inserted rows (0 or 1)
-     * @throws Exception when unexpected error in spring framework occurs
-     */
-    public int insertXdb(XdbId xdb) throws Exception {
-        return xdbIdDAO.insertXdb(xdb);
-    }
-
-    /**
      * return external ids for any combination of parameters;
      * if given parameter is null or 0, it means, that any value of this parameter could be accepted
      *
@@ -83,6 +75,20 @@ public class Dao extends AbstractDAO{
 
     public void insertNomenclatureEvent(NomenclatureEvent event) throws Exception {
         nomenclatureDAO.createNomenEvent(event);
+        logNomenEvents.info("INSERTED "
+            +"KEY:"+event.getNomenEventKey()
+            +"REF_KEY:"+event.getRefKey()
+            +"EVENT_DATE:"+new Timestamp(event.getEventDate().getTime()).toString()
+            +"STATUS:"+event.getNomenStatusType()
+            +"DESC:"+event.getDesc()
+            +"RGD:"+event.getRgdId()
+            +"SYMBOL:"+event.getSymbol()
+            +"NAME:"+event.getName()
+            +"OLD_RGD:"+event.getOriginalRGDId()
+            +"OLD_SYMBOL:"+event.getPreviousSymbol()
+            +"OLD_NAME:"+event.getPreviousName()
+            +"NOTES:"+event.getNotes()
+        +"");
     }
 
     public void updateGene(Gene gene) throws Exception {
