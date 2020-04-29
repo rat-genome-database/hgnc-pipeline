@@ -20,7 +20,6 @@ public class HgncIdManager {
     private String pigVgncIdFile;
     private int refKey;
     private Dao dao = new Dao();
-    private int nomenEvents = 0;
     Logger logDb = Logger.getLogger("hgnc_ids");
 
     public void run() throws Exception {
@@ -61,6 +60,7 @@ public class HgncIdManager {
         logDb.info("   file downloaded to "+localFile);
         int hgncIdsProcessed = 0;
         int conflictCount = 0;
+        int nomenEvents = 0;
 
         BufferedReader reader = Utils.openReader(localFile);
         String line = reader.readLine(); // skip header line
@@ -100,7 +100,9 @@ public class HgncIdManager {
                 g.setSymbol(symbol);
                 g.setName(name);
                 g.setNomenSource("HGNC");
-                updateGene(g,previousSymbol,previousName);
+                if( updateGene(g,previousSymbol,previousName) ) {
+                    nomenEvents++;
+                }
             }
         }
 
@@ -111,13 +113,13 @@ public class HgncIdManager {
         logDb.info("   Number of "+ speciesName+" Genes Updated: "+ nomenEvents);
     }
 
-    void updateGene(Gene gene,String oldSymbol,String oldName) throws Exception {
+    /** return true if a nomen event has been generated
+     */
+    boolean updateGene(Gene gene, String oldSymbol, String oldName) throws Exception {
 
         dao.updateGene(gene);
 
         if(!oldSymbol.equalsIgnoreCase(gene.getSymbol()) || (oldName != null && !oldName.equalsIgnoreCase(gene.getName()))) {
-            nomenEvents++;
-
             NomenclatureEvent event = new NomenclatureEvent();
             event.setRgdId(gene.getRgdId());
             event.setSymbol(gene.getSymbol());
@@ -144,7 +146,9 @@ public class HgncIdManager {
                 aliasData.setTypeName("old_gene_name");
                 dao.insertAlias(aliasData);
             }
+            return true;
         }
+        return false;
     }
 
     public void setVersion(String version) {
