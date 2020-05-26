@@ -12,4 +12,10 @@
         <property name="pigVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/pig/pig_vgnc_gene_set_All.txt"/>
         <property name="refKey" value="133851" />
     </bean>
+
+    <bean id="MgiManager" class="edu.mcw.rgd.pipelines.hgnc.MgiManager">
+        <property name="version" value="MgiManager  -- build 2020-05-13"/>
+        <property name="mgiDataFile" value="http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt"/>
+        <property name="mgdXdbKey" value="5"/>
+    </bean>
 </beans>
