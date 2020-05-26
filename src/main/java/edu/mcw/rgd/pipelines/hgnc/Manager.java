@@ -32,6 +32,11 @@ public class Manager {
                         manager.run();
                         return;
                     }
+                    case "--processMgiData": {
+                        MgiManager manager = (MgiManager) (bf.getBean( "MgiManager"));
+                        manager.run();
+                        return;
+                    }
                 }
             }
 
