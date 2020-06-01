@@ -14,8 +14,9 @@
     </bean>
 
     <bean id="MgiManager" class="edu.mcw.rgd.pipelines.hgnc.MgiManager">
-        <property name="version" value="MgiManager  -- build 2020-05-13"/>
+        <property name="version" value="MgiManager  -- build 2020-05-29"/>
         <property name="mgiDataFile" value="http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt"/>
         <property name="mgdXdbKey" value="5"/>
+        <property name="refKey" value="133851" />
     </bean>
 </beans>
