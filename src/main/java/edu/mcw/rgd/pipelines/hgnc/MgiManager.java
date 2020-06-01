@@ -1,12 +1,16 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
 import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 
+import javax.rmi.CORBA.Util;
 import java.io.BufferedReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MgiManager {
@@ -14,16 +18,25 @@ public class MgiManager {
     String mgiDataFile;
     String version;
     int mgdXdbKey;
+    int refKey;
     Logger logger = Logger.getLogger("mgi_logger");
-    int diffCnt = 0, nullSymbol = 0, DNE = 0;
+    int nomenEvents = 0, nullSymbol = 0, DNE = 0;
 
     public void run() throws Exception {
+        long startTime = System.currentTimeMillis();
+
         logger.info(getVersion());
-        // download file
+        logger.info("   "+dao.getConnectionInfo());
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        logger.info("   started at "+sdt.format(new Date(startTime)));
+
         String mgiFile = downloadEvaVcfFile(getMgiDataFile());
-        // parse file
+        logger.info("   -- Parsing data from Informatics MGI file --\n");
         parseFile(mgiFile);
 
+        long endTime = System.currentTimeMillis();
+        logger.info("   Ended at "+sdt.format(new Date(endTime)));
+        logger.info("   -- HGNC pipeline for MGI data end --");
     }
     void parseFile(String fileName) throws Exception{
 
@@ -43,17 +56,15 @@ public class MgiManager {
                 checkDatabase(allData);
                 i=0;
                 allData.clear();
-                logger.info("Amount that Do not exist: "+DNE);
-                logger.info("Amount that do not hae a symbol: "+nullSymbol);
-                logger.info("Amount that differed: "+diffCnt);
             }
         }
         checkDatabase(allData);
-        logger.info("Final amount that Do not exist: "+DNE);
-        logger.info("Final amount that do not hae a symbol: "+nullSymbol);
-        logger.info("Final amount that differed: "+diffCnt);
-        int total = DNE + nullSymbol+diffCnt;
-        logger.info("Total amount that differed: "+total);
+        logger.info('\n');
+        logger.info("   Final amount that Do not exist: "+DNE);
+        logger.info("   Final amount that do not hae a symbol: "+nullSymbol);
+        logger.info("   Nomen Events that changed: "+nomenEvents);
+        int total = DNE + nullSymbol+nomenEvents;
+        logger.info("   Total amount that differed: "+total);
     }
 
     String downloadEvaVcfFile(String file) throws Exception{
@@ -78,13 +89,12 @@ public class MgiManager {
                         logger.info("RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Old gene symbol is null -- "+mgi.getMarkerSymbol());
                         nullSymbol++;
                     }
-                    else if(!gene.getSymbol().equals(mgi.getMarkerSymbol())){
+                    else if(!Utils.stringsAreEqual(gene.getSymbol(),mgi.getMarkerSymbol())){  //!gene.getSymbol().equals(mgi.getMarkerSymbol())){
                         logger.info("RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Old: "+gene.getSymbol()+" -- New: "+mgi.getMarkerSymbol());
-                        diffCnt++;
-                        // change gene symbol to new symbol
-                        // use GeneDAO to update with new gene
+                        if(updateGene(mgi,gene))
+                            nomenEvents++;
                     }
-                    else {
+                    else { // symbols are the same
                         logger.info("Gene has the same Symbol. RGD_ID: " + gene.getRgdId() + ", MGI Accession: "+mgi.getAccessionId()+"   Gene Symbol: "+gene.getSymbol());
                     }
                 }// end gene for
@@ -92,7 +102,7 @@ public class MgiManager {
         }// end mgi for
     }
 
-    Mgi createMgi(String lineData, String[] col){
+    Mgi createMgi(String lineData, String[] col) throws Exception{
          Mgi data = new Mgi();
          String[] line = lineData.split("\t");
          for (int i = 0;i<col.length;i++){
@@ -152,6 +162,43 @@ public class MgiManager {
          return data;
     }
 
+    boolean updateGene(Mgi mgi, Gene gene) throws Exception {
+        // change gene symbol to new symbol
+        // use GeneDAO to update with new gene, includes new name and symbol
+        // description set to symbol updated
+        // update nomen_events
+
+        // do a check if event was created recently, to not double up on events
+        // grab all based on rgd_id, then compare symbol and name
+        // if same, don't add new event
+
+        String prevSymbol = gene.getSymbol(), prevName = gene.getName();
+        gene.setSymbol(mgi.getMarkerSymbol());
+        gene.setName(mgi.getMarkerName());
+
+        dao.updateGene(gene);
+
+        if(!Utils.stringsAreEqualIgnoreCase(gene.getSymbol(),prevSymbol) ||
+                !Utils.stringsAreEqualIgnoreCase(gene.getName(),prevName)){
+            NomenclatureEvent change = new NomenclatureEvent();
+            change.setOriginalRGDId(gene.getRgdId());
+            change.setRgdId(gene.getRgdId());
+            change.setName(gene.getName());
+            change.setPreviousName(prevName);
+            change.setSymbol(gene.getSymbol());
+            change.setPreviousSymbol(prevSymbol);
+            change.setEventDate(new Date());
+            change.setDesc("Symbol and/or name updated");
+            change.setNomenStatusType("PROVISIONAL"); // change before production
+            change.setRefKey(String.valueOf(getRefKey()));
+
+            dao.insertNomenclatureEvent(change);
+
+            return true;
+        }
+        return false;
+    }
+
     public void setMgiDataFile(String mgiDataFile) {
         this.mgiDataFile = mgiDataFile;
     }
@@ -171,4 +218,8 @@ public class MgiManager {
     public void setMgdXdbKey(int mgdXdbKey) {this.mgdXdbKey = mgdXdbKey; }
 
     public int getMgdXdbKey(){return mgdXdbKey;}
+
+    public int getRefKey(){return refKey;}
+
+    public void setRefKey(int refKey){this.refKey=refKey;}
 }
