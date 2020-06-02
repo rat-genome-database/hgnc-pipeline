@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # shell script to run Hgnc pipeline
+
 . /etc/profile
 
 APPNAME=HgncPipeline
