@@ -80,7 +80,7 @@ public class MgiManager {
         for(Mgi mgi : data){
             List<Gene> dbGene = dao.getActiveGenesByXdbId(getMgdXdbKey(), mgi.getAccessionId());
             if(dbGene.isEmpty()){
-                logger.info("Gene was not found: "+mgi.getAccessionId()+" : "+mgi.getMarkerSymbol());
+                //logger.info("Gene was not found: "+mgi.getAccessionId()+" : "+mgi.getMarkerSymbol());
                 DNE++;
             }
             else{
