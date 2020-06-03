@@ -6,6 +6,7 @@ import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 import java.io.BufferedReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -41,6 +42,76 @@ public class HgncIdManager {
 
     public void run(int speciesTypeKey) throws Exception {
 
+        List<HgncGene> hgncGenes = parseInputFile(speciesTypeKey);
+
+        String speciesName = SpeciesType.getCommonName(speciesTypeKey);
+
+        int conflictCount = 0;
+        int nomenEvents = 0;
+        int genesModified = 0;
+
+        for( HgncGene g: hgncGenes ) {
+
+            String acc = (speciesTypeKey==SpeciesType.HUMAN ? "HGNC:" : "VGNC:") + g.hgncId;
+
+            String matchBy = "";
+            List<Gene> existingGenes;
+            if( speciesTypeKey==SpeciesType.HUMAN ) {
+                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, g.hgncId);
+            } else {
+                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_VGNC, g.hgncId);
+            }
+            if( existingGenes.size() == 1 ) {
+                matchBy = "match by "+acc;
+            } else {
+                if( g.ncbiId != null ) {
+                    existingGenes = dao.getActiveGenesByNcbiId(g.ncbiId);
+                    if( existingGenes.size()==1 ) {
+                        matchBy = "match by NCBI:"+g.ncbiId+" ("+acc+")";
+                    }
+                }
+                if( existingGenes.size() != 1 && g.ensemblId != null ) {
+                    existingGenes = dao.getActiveGenesByEnsemblId(g.ensemblId);
+                    if (existingGenes.size() == 1) {
+                        matchBy = "match by " + g.ensemblId+" ("+acc+")";
+                    }
+                }
+            }
+
+            if( existingGenes.size() != 1 ){
+                logDb.debug("   Genes not found/ Found with multiple Rgd IDs for " + acc);
+                conflictCount++;
+            } else {
+                Gene gene = existingGenes.get(0);
+                String previousSymbol = gene.getSymbol();
+                String previousName = gene.getName();
+
+                if( Utils.stringsAreEqual(g.symbol, previousSymbol)
+                    && Utils.stringsAreEqual(g.name, previousName)
+                    && Utils.stringsAreEqual(gene.getNomenSource(), "HGNC") ) {
+
+                    // everything up-to-date: continue to next line
+                    continue;
+                }
+
+                gene.setSymbol(g.symbol);
+                gene.setName(g.name);
+                gene.setNomenSource("HGNC");
+                if( updateGene(gene, previousSymbol, previousName, matchBy) ) {
+                    nomenEvents++;
+                }
+                genesModified++;
+            }
+        }
+
+        logDb.info("   Number of HGNC/VGNC ids in "+ speciesName+" the file: "+ hgncGenes.size());
+        logDb.info("      out of which "+conflictCount+" did not match a single gene in RGD");
+        logDb.info("   Number of "+ speciesName+" Genes Updated: "+ genesModified);
+        logDb.info("   Number of "+ speciesName+" Nomen Events created: "+ nomenEvents);
+    }
+
+    public List<HgncGene> parseInputFile(int speciesTypeKey) throws Exception {
+
         String speciesName = SpeciesType.getCommonName(speciesTypeKey);
         logDb.info("");
         logDb.info(speciesName.toUpperCase()+" HGNC file processing ...");
@@ -58,81 +129,27 @@ public class HgncIdManager {
         String localFile = downloader.downloadNew();
 
         logDb.info("   file downloaded to "+localFile);
-        int hgncIdsProcessed = 0;
-        int conflictCount = 0;
-        int nomenEvents = 0;
-        int genesModified = 0;
+
+        List<HgncGene> hgncGenes = new ArrayList<>();
 
         BufferedReader reader = Utils.openReader(localFile);
         String line = reader.readLine(); // skip header line
         while( (line=reader.readLine())!=null ) {
-            hgncIdsProcessed++;
 
             String[] cols = line.split("[\\t]", -1);
-            String hgncId = cols[0].substring(5);
-            String symbol = cols[1];
-            String name = cols[2];
-            String ncbiId = cols[18];
-            String ensemblId = cols[19];
+            HgncGene hgncGene = new HgncGene();
+            hgncGene.hgncId = cols[0].substring(5);
+            hgncGene.symbol = cols[1];
+            hgncGene.name = cols[2];
+            hgncGene.ncbiId = cols[18];
+            hgncGene.ensemblId = cols[19];
 
-            String acc = (speciesTypeKey==SpeciesType.HUMAN ? "HGNC:" : "VGNC:") + hgncId;
-
-            String matchBy = "";
-            List<Gene> existingGenes;
-            if( speciesTypeKey==SpeciesType.HUMAN ) {
-                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, hgncId);
-            } else {
-                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_VGNC, hgncId);
-            }
-            if( existingGenes.size() == 1 ) {
-                matchBy = "match by "+acc;
-            } else {
-                if( ncbiId != null ) {
-                    existingGenes = dao.getActiveGenesByNcbiId(ncbiId);
-                    if( existingGenes.size()==1 ) {
-                        matchBy = "match by NCBI:"+ncbiId+" ("+acc+")";
-                    }
-                }
-                if( existingGenes.size() != 1 && ensemblId != null ) {
-                    existingGenes = dao.getActiveGenesByEnsemblId(ensemblId);
-                    if (existingGenes.size() == 1) {
-                        matchBy = "match by " + ensemblId+" ("+acc+")";
-                    }
-                }
-            }
-
-            if( existingGenes.size() != 1 ){
-                logDb.debug("   Genes not found/ Found with multiple Rgd IDs for " + acc);
-                conflictCount++;
-            } else {
-                Gene g = existingGenes.get(0);
-                String previousSymbol = g.getSymbol();
-                String previousName = g.getName();
-
-                if( Utils.stringsAreEqual(symbol, previousSymbol)
-                    && Utils.stringsAreEqual(name, previousName)
-                    && Utils.stringsAreEqual(g.getNomenSource(), "HGNC") ) {
-
-                    // everything up-to-date: continue to next line
-                    continue;
-                }
-
-                g.setSymbol(symbol);
-                g.setName(name);
-                g.setNomenSource("HGNC");
-                if( updateGene(g, previousSymbol, previousName, matchBy) ) {
-                    nomenEvents++;
-                }
-                genesModified++;
-            }
+            hgncGenes.add(hgncGene);
         }
 
         reader.close();
 
-        logDb.info("   Number of HGNC/VGNC ids in "+ speciesName+" the file: "+ hgncIdsProcessed);
-        logDb.info("      out of which "+conflictCount+" did not match a single gene in RGD");
-        logDb.info("   Number of "+ speciesName+" Genes Updated: "+ genesModified);
-        logDb.info("   Number of "+ speciesName+" Nomen Events created: "+ nomenEvents);
+        return hgncGenes;
     }
 
     /** return true if a nomen event has been generated
