@@ -1,13 +1,16 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
+import edu.mcw.rgd.dao.impl.XdbIdDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
+import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 
 import javax.rmi.CORBA.Util;
 import java.io.BufferedReader;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +23,9 @@ public class MgiManager {
     int mgdXdbKey;
     int refKey;
     Logger logger = Logger.getLogger("mgi_logger");
-    int nomenEvents = 0, nullSymbol = 0, DNE = 0;
+    int nomenEvents = 0, nullSymbol = 0, DNE = 0, noChange = 0;
+    List<Gene> update = new ArrayList<>();
+    List<Mgi> updateMgiToGene = new ArrayList<>();
 
     public void run() throws Exception {
         long startTime = System.currentTimeMillis();
@@ -60,11 +65,13 @@ public class MgiManager {
         }
         checkDatabase(allData);
         logger.info('\n');
-        logger.info("   Final amount that Do not exist: "+DNE);
-        logger.info("   Final amount that do not hae a symbol: "+nullSymbol);
+        logger.info("   Final amount that are not in RGD: "+DNE);
+        logger.info("   Final amount that do not have a symbol: "+nullSymbol);
         logger.info("   Nomen Events that changed: "+nomenEvents);
         int total = DNE + nullSymbol+nomenEvents;
         logger.info("   Total amount that differed: "+total);
+        logger.info("   Amount that have not changed: "+noChange);
+
     }
 
     String downloadEvaVcfFile(String file) throws Exception{
@@ -86,16 +93,26 @@ public class MgiManager {
             else{
                 for(Gene gene: dbGene){
                     if(gene.getSymbol()==null) {
-                        logger.info("RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Old gene symbol is null -- "+mgi.getMarkerSymbol());
+                        //logger.info("RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Old gene symbol is null -- "+mgi.getMarkerSymbol());
                         nullSymbol++;
                     }
                     else if(!Utils.stringsAreEqual(gene.getSymbol(),mgi.getMarkerSymbol())){  //!gene.getSymbol().equals(mgi.getMarkerSymbol())){
                         logger.info("RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Old: "+gene.getSymbol()+" -- New: "+mgi.getMarkerSymbol());
-                        if(updateGene(mgi,gene))
+                        List<XdbId> list =  dao.getXdbIdsByRgdId(mgdXdbKey,gene.getRgdId());
+                        int conflict = list.size();
+                        if(conflict < 2 && updateGene(mgi,gene))
                             nomenEvents++;
+                        else {
+                            for(XdbId xdb : list){
+                                if(!Utils.stringsAreEqualIgnoreCase(xdb.getAccId(),mgi.getAccessionId()))
+                                    logger.info("Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession: " + mgi.getAccessionId()+" and "+xdb.getAccId());
+                            }
+
+                        }
                     }
                     else { // symbols are the same
-                        logger.info("Gene has the same Symbol. RGD_ID: " + gene.getRgdId() + ", MGI Accession: "+mgi.getAccessionId()+"   Gene Symbol: "+gene.getSymbol());
+//                        logger.info("Gene has the same Symbol. RGD_ID: " + gene.getRgdId() + ", MGI Accession: "+mgi.getAccessionId()+"   Gene Symbol: "+gene.getSymbol());
+                        noChange++;
                     }
                 }// end gene for
             }
@@ -163,15 +180,7 @@ public class MgiManager {
     }
 
     boolean updateGene(Mgi mgi, Gene gene) throws Exception {
-        // change gene symbol to new symbol
-        // use GeneDAO to update with new gene, includes new name and symbol
-        // description set to symbol updated
-        // update nomen_events
-
-        // do a check if event was created recently, to not double up on events
-        // grab all based on rgd_id, then compare symbol and name
-        // if same, don't add new event
-
+        // check for same rgd ID then say conflict
         String prevSymbol = gene.getSymbol(), prevName = gene.getName();
         gene.setSymbol(mgi.getMarkerSymbol());
         gene.setName(mgi.getMarkerName());
@@ -198,6 +207,7 @@ public class MgiManager {
         }
         return false;
     }
+
 
     public void setMgiDataFile(String mgiDataFile) {
         this.mgiDataFile = mgiDataFile;
