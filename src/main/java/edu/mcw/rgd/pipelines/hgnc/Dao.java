@@ -113,4 +113,8 @@ public class Dao extends AbstractDAO{
                 "AND r.object_key = 1 AND x.XDB_KEY=? AND x.ACC_ID=? AND r.OBJECT_STATUS='ACTIVE' AND x.src_pipeline=?";
         return  GeneQuery.execute(this,sql, xdbKey, accId, srcPipeline);
     }
+
+    public List<XdbId> getXdbIdsByRgdId(int xdbKey, int rgdId) throws Exception {
+        return xdbIdDAO.getXdbIdsByRgdId(xdbKey,rgdId);
+    }
 }
