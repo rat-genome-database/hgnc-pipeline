@@ -106,14 +106,15 @@ public class MgiManager {
                         else {
                             String msg = "Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession:";
                             for(XdbId xdb : list){
-                                msg+=" ";
+//                                msg+=" ";
                                 if(!Utils.stringsAreEqualIgnoreCase(xdb.getAccId(),mgi.getAccessionId()))
                                 {
-                                    msg += (xdb.getAccId());
+//                                    msg += (xdb.getAccId());
+
+                                    logger.info("Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession: " + mgi.getAccessionId()+" and "+xdb.getAccId());
                                 }
-//                                    logger.info("Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession: " + mgi.getAccessionId()+" and "+xdb.getAccId());
                             }
-                            logger.info(msg);
+//                            logger.info(msg);
                         }
                     }
                     else { // symbols are the same
