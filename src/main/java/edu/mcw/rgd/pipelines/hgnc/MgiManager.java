@@ -12,9 +12,7 @@ import javax.rmi.CORBA.Util;
 import java.io.BufferedReader;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class MgiManager {
     Dao dao = new Dao();
@@ -24,8 +22,7 @@ public class MgiManager {
     int refKey;
     Logger logger = Logger.getLogger("mgi_logger");
     int nomenEvents = 0, nullSymbol = 0, DNE = 0, noChange = 0;
-    List<Gene> update = new ArrayList<>();
-    List<Mgi> updateMgiToGene = new ArrayList<>();
+    Map<String,Gene> conflicts = new HashMap<>();
 
     public void run() throws Exception {
         long startTime = System.currentTimeMillis();
@@ -104,17 +101,14 @@ public class MgiManager {
                             nomenEvents++;
                         }
                         else {
-                            String msg = "Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession:";
+                            //String msg = "Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession:";
                             for(XdbId xdb : list){
-//                                msg+=" ";
                                 if(!Utils.stringsAreEqualIgnoreCase(xdb.getAccId(),mgi.getAccessionId()))
-                                {
-//                                    msg += (xdb.getAccId());
-
-                                    logger.info("Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession: " + mgi.getAccessionId()+" and "+xdb.getAccId());
-                                }
+                                    conflicts.put(xdb.getAccId(),gene);
+//                                    logger.info("Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession: " + mgi.getAccessionId()+" and "+xdb.getAccId());
                             }
-//                            logger.info(msg);
+                            logger.info("Conflict with RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Gene: "+gene.getSymbol()+", "+gene.getName()+
+                                    " -- Mgi: "+mgi.getMarkerSymbol()+", "+mgi.getMarkerName());
                         }
                     }
                     else { // symbols are the same
@@ -122,6 +116,11 @@ public class MgiManager {
                         noChange++;
                     }
                 }// end gene for
+            }
+            if(conflictMgi(mgi.getAccessionId())) {
+                logger.info("Conflict with RGD_ID: " + conflicts.get(mgi.getAccessionId()).getRgdId() + ", MGI Accession: " + mgi.getAccessionId() +
+                        "   Gene: " + conflicts.get(mgi.getAccessionId()).getSymbol() + ", " + conflicts.get(mgi.getAccessionId()).getName()
+                        + " -- Mgi: " + mgi.getMarkerSymbol() + ", " + mgi.getMarkerName());
             }
         }// end mgi for
     }
@@ -211,6 +210,12 @@ public class MgiManager {
 
             return true;
         }
+        return false;
+    }
+    boolean conflictMgi(String accId)
+    {
+           if(conflicts.get(accId) != null)
+                return true;
         return false;
     }
 
