@@ -107,8 +107,8 @@ public class MgiManager {
                                     conflicts.put(xdb.getAccId(),gene);
 //                                    logger.info("Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession: " + mgi.getAccessionId()+" and "+xdb.getAccId());
                             }
-                            logger.info("Conflict with RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Gene: "+gene.getSymbol()+", "+gene.getName()+
-                                    " -- Mgi: "+mgi.getMarkerSymbol()+", "+mgi.getMarkerName());
+                            logger.info("Conflict with RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Gene: "+gene.getSymbol()+"; "+gene.getName()+
+                                    " -- Mgi: "+mgi.getMarkerSymbol()+"; "+mgi.getMarkerName());
                         }
                     }
                     else { // symbols are the same
@@ -119,8 +119,8 @@ public class MgiManager {
             }
             if(conflictMgi(mgi.getAccessionId())) {
                 logger.info("Conflict with RGD_ID: " + conflicts.get(mgi.getAccessionId()).getRgdId() + ", MGI Accession: " + mgi.getAccessionId() +
-                        "   Gene: " + conflicts.get(mgi.getAccessionId()).getSymbol() + ", " + conflicts.get(mgi.getAccessionId()).getName()
-                        + " -- Mgi: " + mgi.getMarkerSymbol() + ", " + mgi.getMarkerName());
+                        "   Gene: " + conflicts.get(mgi.getAccessionId()).getSymbol() + "; " + conflicts.get(mgi.getAccessionId()).getName()
+                        + " -- Mgi: " + mgi.getMarkerSymbol() + "; " + mgi.getMarkerName());
             }
         }// end mgi for
     }
