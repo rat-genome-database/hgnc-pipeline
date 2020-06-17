@@ -97,7 +97,6 @@ public class MgiManager {
                         List<XdbId> list =  dao.getXdbIdsByRgdId(mgdXdbKey,gene.getRgdId());
                         int conflict = list.size();
                         if(conflict < 2 && updateGene(mgi,gene)) {
-                            logger.info("RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Old: "+gene.getSymbol()+" -- New: "+mgi.getMarkerSymbol());
                             nomenEvents++;
                         }
                         else {
@@ -186,6 +185,7 @@ public class MgiManager {
     }
 
     boolean updateGene(Mgi mgi, Gene gene) throws Exception {
+        logger.info("RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Old: "+gene.getSymbol()+" -- New: "+mgi.getMarkerSymbol());
         String prevSymbol = gene.getSymbol(), prevName = gene.getName();
         gene.setSymbol(mgi.getMarkerSymbol());
         gene.setName(mgi.getMarkerName());
