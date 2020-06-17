@@ -189,7 +189,7 @@ public class MgiManager {
         String prevSymbol = gene.getSymbol(), prevName = gene.getName();
         gene.setSymbol(mgi.getMarkerSymbol());
         gene.setName(mgi.getMarkerName());
-
+        gene.setNomenSource("MGI");
         dao.updateGene(gene);
 
         if(!Utils.stringsAreEqualIgnoreCase(gene.getSymbol(),prevSymbol) ||
