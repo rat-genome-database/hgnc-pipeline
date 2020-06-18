@@ -51,10 +51,8 @@ public class MgiManager {
         String[] col = firstLine.split("\t");
         while((lineData = br.readLine()) != null) {
             allData.add(createMgi(lineData, col));
-//            System.out.println(allData.get(i).toString());
             i++;
             if(i==50000){
-                // update db with Marker symbol id different
                 checkDatabase(allData);
                 i=0;
                 allData.clear();
@@ -83,44 +81,35 @@ public class MgiManager {
     void checkDatabase(List<Mgi> data) throws Exception{
         for(Mgi mgi : data){
             List<Gene> dbGene = dao.getActiveGenesByXdbId(getMgdXdbKey(), mgi.getAccessionId());
-            if(dbGene.isEmpty()){
-                //logger.info("Gene was not found: "+mgi.getAccessionId()+" : "+mgi.getMarkerSymbol());
+            if(dbGene.isEmpty())
                 DNE++;
-            }
             else{
                 for(Gene gene: dbGene){
-                    if(gene.getSymbol()==null) {
-                        //logger.info("RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Old gene symbol is null -- "+mgi.getMarkerSymbol());
+                    if(gene.getSymbol()==null)
                         nullSymbol++;
-                    }
-                    else if(!Utils.stringsAreEqual(gene.getSymbol(),mgi.getMarkerSymbol())){  //!gene.getSymbol().equals(mgi.getMarkerSymbol())){
+                    else if(!Utils.stringsAreEqual(gene.getSymbol(),mgi.getMarkerSymbol())){
                         List<XdbId> list =  dao.getXdbIdsByRgdId(mgdXdbKey,gene.getRgdId());
                         int conflict = list.size();
-                        if(conflict < 2 && updateGene(mgi,gene)) {
+                        if(conflict < 2 && updateGene(mgi,gene))
                             nomenEvents++;
-                        }
                         else {
-                            //String msg = "Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession:";
                             for(XdbId xdb : list){
                                 if(!Utils.stringsAreEqualIgnoreCase(xdb.getAccId(),mgi.getAccessionId()))
                                     conflicts.put(xdb.getAccId(),gene);
-//                                    logger.info("Conflict with RGD_ID: " + gene.getRgdId() + " and MGI Accession: " + mgi.getAccessionId()+" and "+xdb.getAccId());
                             }
                             logger.info("Conflict with RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Gene: "+gene.getSymbol()+"; "+gene.getName()+
                                     " -- Mgi: "+mgi.getMarkerSymbol()+"; "+mgi.getMarkerName());
                         }
                     }
                     else { // symbols are the same
-//                        logger.info("Gene has the same Symbol. RGD_ID: " + gene.getRgdId() + ", MGI Accession: "+mgi.getAccessionId()+"   Gene Symbol: "+gene.getSymbol());
-                        noChange++;
+                         noChange++;
                     }
                 }// end gene for
             }
-            if(conflictMgi(mgi.getAccessionId())) {
+            if(conflictMgi(mgi.getAccessionId()))
                 logger.info("Conflict with RGD_ID: " + conflicts.get(mgi.getAccessionId()).getRgdId() + ", MGI Accession: " + mgi.getAccessionId() +
                         "   Gene: " + conflicts.get(mgi.getAccessionId()).getSymbol() + "; " + conflicts.get(mgi.getAccessionId()).getName()
                         + " -- Mgi: " + mgi.getMarkerSymbol() + "; " + mgi.getMarkerName());
-            }
         }// end mgi for
     }
 
@@ -203,7 +192,7 @@ public class MgiManager {
             change.setPreviousSymbol(prevSymbol);
             change.setEventDate(new Date());
             change.setDesc("Symbol and/or name updated");
-            change.setNomenStatusType("PROVISIONAL"); // change before production
+            change.setNomenStatusType("PROVISIONAL");
             change.setRefKey(String.valueOf(getRefKey()));
 
             dao.insertNomenclatureEvent(change);
