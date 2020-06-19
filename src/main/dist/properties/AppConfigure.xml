@@ -17,6 +17,6 @@
         <property name="version" value="MgiManager  -- build 2020-05-29"/>
         <property name="mgiDataFile" value="http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt"/>
         <property name="mgdXdbKey" value="5"/>
-        <property name="refKey" value="134636" />
+       <property name="refKey" value="134636" /> <!-- value="133851" for dev use-->
     </bean>
 </beans>
