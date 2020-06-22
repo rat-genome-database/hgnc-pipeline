@@ -1,6 +1,5 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
-import edu.mcw.rgd.dao.impl.XdbIdDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.datamodel.XdbId;
@@ -8,9 +7,7 @@ import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 
-import javax.rmi.CORBA.Util;
 import java.io.BufferedReader;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -40,6 +37,7 @@ public class MgiManager {
         logger.info("   Ended at "+sdt.format(new Date(endTime)));
         logger.info("   -- HGNC pipeline for MGI data end --");
     }
+
     void parseFile(String fileName) throws Exception{
 
         BufferedReader br = Utils.openReader(fileName);
@@ -113,7 +111,7 @@ public class MgiManager {
         }// end mgi for
     }
 
-    Mgi createMgi(String lineData, String[] col) throws Exception{
+    Mgi createMgi(String lineData, String[] col) {
          Mgi data = new Mgi();
          String[] line = lineData.split("\t");
          for (int i = 0;i<col.length;i++){
