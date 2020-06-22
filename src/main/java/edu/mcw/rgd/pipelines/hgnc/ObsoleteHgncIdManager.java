@@ -1,6 +1,8 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
 import edu.mcw.rgd.datamodel.Alias;
+import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
@@ -88,8 +90,37 @@ public class ObsoleteHgncIdManager {
         filter.setAccId(obsoleteHgncId);
         filter.setXdbKey(XdbId.XDB_KEY_HGNC);
 
-        List<XdbId> xdbIds = dao.getXdbIds(filter);
+        List<XdbId> xdbIds = dao.getXdbIds(filter, SpeciesType.HUMAN);
         for( XdbId id: xdbIds ) {
+
+            if( mergedToHgncId!=null ) {
+                // QC: replace HGNC id only if there is no other gene having the same target HGNC ID
+                filter.setAccId(mergedToHgncId);
+                List<XdbId> genesWithMergedToHgncId = dao.getXdbIds(filter, SpeciesType.HUMAN);
+                Gene otherActiveGeneWithSameTargetHgncId = null;
+                for( XdbId mergedToXdbId: genesWithMergedToHgncId ) {
+                    if( mergedToXdbId.getRgdId()!=id.getRgdId() ) {
+                        // check if the object with merged-to-HGNC-ID is an active gene
+                        List<Gene> genes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, mergedToHgncId);
+                        for( Gene g: genes ) {
+                            if( g.getRgdId()==mergedToXdbId.getRgdId() ) {
+                                otherActiveGeneWithSameTargetHgncId = g;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if( otherActiveGeneWithSameTargetHgncId!=null ) {
+                    // there is another active gene (gene different than gene with source HGNC ID)
+                    // having the same merged-to HGNC ID; that means a conflict
+                    // and thus we remove the obsolete HGNC ID to avoid having two active genes with the same HGNC ID
+                    Gene g = otherActiveGeneWithSameTargetHgncId;
+                    logDb.info("CONFLICT: obsolete "+obsoleteHgncId+" may not be replaced with "+mergedToHgncId);
+                    logDb.info("   for gene RGD:"+id.getRgdId()+" because there is another active gene "+g.getSymbol()+" (RGD:"+ g.getRgdId()+")");
+                    logDb.info("   already associated with "+mergedToHgncId);
+                    mergedToHgncId = null;
+                }
+            }
 
             if( mergedToHgncId!=null ) {
                 // replace HGNC id
