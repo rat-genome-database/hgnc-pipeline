@@ -3,6 +3,7 @@
 
 APPNAME=HgncPipeline
 APPDIR=/home/rgddata/pipelines/$APPNAME
+SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 
 EMAILLIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
