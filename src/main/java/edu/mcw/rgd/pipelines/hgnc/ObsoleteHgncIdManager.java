@@ -7,6 +7,7 @@ import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +33,10 @@ public class ObsoleteHgncIdManager {
 
         long time0 = System.currentTimeMillis();
 
-        System.out.println(getVersion());
+        logDb.info(getVersion());
+        logDb.info("   "+dao.getConnectionInfo());
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        logDb.info("   started at "+sdt.format(new Date(time0)));
 
         FileDownloader downloader = new FileDownloader();
         downloader.setExternalFile(getObsoleteHgncIdFile());
