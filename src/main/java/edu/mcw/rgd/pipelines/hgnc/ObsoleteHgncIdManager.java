@@ -65,17 +65,17 @@ public class ObsoleteHgncIdManager {
         }
         reader.close();
 
-        System.out.println("Processed obsolete HGNC ids: "+obsoleteHgncIdsProcessed);
-        System.out.println(" -- withdrawn HGNC ids: "+withdrawnHgncIdsProcessed);
-        System.out.println(" -- merged HGNC ids: "+mergedHgncIdsProcessed);
+        logDb.info("Processed obsolete HGNC ids: "+obsoleteHgncIdsProcessed);
+        logDb.info(" -- withdrawn HGNC ids: "+withdrawnHgncIdsProcessed);
+        logDb.info(" -- merged HGNC ids: "+mergedHgncIdsProcessed);
 
         if( hgncIdsDeletedInRgd!=0 ) {
-            System.out.println("HGNC ID deleted from RGD db: " + hgncIdsDeletedInRgd);
+            logDb.info("HGNC ID deleted from RGD db: " + hgncIdsDeletedInRgd);
         }
         if( hgncIdsReplacedInRgd!=0 ) {
-            System.out.println("HGNC ID replaced in RGD db: " + hgncIdsReplacedInRgd);
+            logDb.info("HGNC ID replaced in RGD db: " + hgncIdsReplacedInRgd);
         }
-        System.out.println("Processing of obsolete HGNC ids complete: "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+        logDb.info("Processing of obsolete HGNC ids complete: "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
     }
 
     void updateRgdDb(String obsoleteHgncId, String mergedToHgncId) throws Exception {

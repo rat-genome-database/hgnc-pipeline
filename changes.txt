@@ -1,3 +1,10 @@
+2020-06-22
+  obsoleteHgncIds
+    improved logging
+
+2020-06-xx
+  mgiIds: implemented nomenclature updates for mouse genes
+
 2020-06-03
   hgncIds: better handling of conflicts; improved logging
 
