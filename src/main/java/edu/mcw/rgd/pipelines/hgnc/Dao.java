@@ -61,16 +61,8 @@ public class Dao extends AbstractDAO{
         return xdbIdDAO.deleteXdbIds(xdbIds);
     }
 
-    /**
-     * return external ids for any combination of parameters;
-     * if given parameter is null or 0, it means, that any value of this parameter could be accepted
-     *
-     * @param xdbId - acc_id,xdb_id,rgd_id and src_pipeline are checked
-     * @return list of external ids
-     * @throws Exception when unexpected error in spring framework occurs
-     */
-    public List<XdbId> getXdbIds(XdbId xdbId) throws Exception {
-        return xdbIdDAO.getXdbIds(xdbId);
+    public List<XdbId> getXdbIds(XdbId xdbId, int speciesTypeKey) throws Exception {
+        return xdbIdDAO.getXdbIds(xdbId, speciesTypeKey);
     }
 
     public void insertNomenclatureEvent(NomenclatureEvent event) throws Exception {
