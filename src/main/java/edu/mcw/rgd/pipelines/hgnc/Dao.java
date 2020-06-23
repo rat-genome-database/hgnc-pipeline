@@ -8,9 +8,15 @@ import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.datamodel.XdbId;
 import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.object.MappingSqlQuery;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -108,5 +114,39 @@ public class Dao extends AbstractDAO{
 
     public List<XdbId> getXdbIdsByRgdId(int xdbKey, int rgdId) throws Exception {
         return xdbIdDAO.getXdbIdsByRgdId(xdbKey,rgdId);
+    }
+
+    public ObsoleteHgncId getObsoleteHgncId(String hgncId) throws Exception {
+
+        String sql = "SELECT * FROM obsolete_hgnc_ids WHERE hgnc_id=?";
+        MappingSqlQuery q = new MappingSqlQuery(xdbIdDAO.getDataSource(), sql) {
+            @Override
+            protected Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+                ObsoleteHgncId o = new ObsoleteHgncId();
+                o.setHgncId(rs.getString("hgnc_id"));
+                o.setStatus(rs.getString("status"));
+                o.setWithdrawnSymbol(rs.getString("withdrawn_symbol"));
+                o.setMergedIntoReport(rs.getString("merged_into_report"));
+                o.setCreatedDate(rs.getDate("created_date"));
+                o.setLastModifiedDate(rs.getDate("last_modified_date"));
+                return o;
+            }
+        };
+        q.declareParameter(new SqlParameter(Types.VARCHAR));
+        q.compile();
+        List<ObsoleteHgncId> results = q.execute(hgncId);
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    public void insertObsoleteHgncId(String obsoleteHgncId, String status, String withdrawnSymbol, String mergedIntoReport) throws Exception {
+
+        String sql = "INSERT INTO obsolete_hgnc_ids (hgnc_id,status,withdrawn_symbol,merged_into_report) VALUES(?,?,?,?)";
+        xdbIdDAO.update(sql, obsoleteHgncId, status, withdrawnSymbol, mergedIntoReport);
+    }
+
+    public void updateObsoleteHgncId(String obsoleteHgncId, String status, String withdrawnSymbol, String mergedIntoReport) throws Exception {
+
+        String sql = "UPDATE obsolete_hgnc_ids SET last_modified_date=SYSDATE,status=?,withdrawn_symbol=?,merged_into_report=? WHERE hgnc_id=?";
+        xdbIdDAO.update(sql, status, withdrawnSymbol, mergedIntoReport, obsoleteHgncId);
     }
 }

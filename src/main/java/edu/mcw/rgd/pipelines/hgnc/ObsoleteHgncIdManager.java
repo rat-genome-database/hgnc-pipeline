@@ -58,9 +58,15 @@ public class ObsoleteHgncIdManager {
 
             String[] cols = line.split("[\\t]", -1);
             String obsoleteHgncId = cols[0];
+            String status = cols[1];
+            String withdrawnSymbol = cols[2];
+            String mergedIntoReport = cols[3];
+
+            updateObsoleteHgncIdsTable(obsoleteHgncId, status, withdrawnSymbol, mergedIntoReport);
+
             String mergedToHgncId = null;
-            if( !Utils.isStringEmpty(cols[3]) ) {
-                String[] mergeInfo = cols[3].split("[\\|]", -1);
+            if( !Utils.isStringEmpty(mergedIntoReport) ) {
+                String[] mergeInfo = mergedIntoReport.split("[\\|]", -1);
                 mergedToHgncId = mergeInfo[0];
                 mergedHgncIdsProcessed++;
             } else {
@@ -152,6 +158,22 @@ public class ObsoleteHgncIdManager {
             alias.setValue(obsoleteHgncId);
             alias.setNotes("created by ObsoleteHgncId pipeline");
             dao.insertAlias(alias);
+        }
+    }
+
+    void updateObsoleteHgncIdsTable(String obsoleteHgncId, String status, String withdrawnSymbol, String mergedIntoReport) throws Exception {
+
+        ObsoleteHgncId o = dao.getObsoleteHgncId(obsoleteHgncId);
+        if( o==null ) {
+            dao.insertObsoleteHgncId(obsoleteHgncId, status, withdrawnSymbol, mergedIntoReport);
+        } else {
+            // check if any properties changed
+            boolean matches = Utils.stringsAreEqual(o.getStatus(), status) &&
+                    Utils.stringsAreEqual(o.getWithdrawnSymbol(), withdrawnSymbol) &&
+                    Utils.stringsAreEqual(o.getMergedIntoReport(), mergedIntoReport);
+            if( !matches ) {
+                dao.updateObsoleteHgncId(obsoleteHgncId, status, withdrawnSymbol, mergedIntoReport);
+            }
         }
     }
 
