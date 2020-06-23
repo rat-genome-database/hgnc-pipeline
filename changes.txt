@@ -2,6 +2,7 @@
   obsoleteHgncIds
     when merged-to-HGNC-ID is already assigned to another active human gene,
       drop the obsolete HGNC-ID instead of merging it, and alert the user about it
+    the entire incoming data set is loaded into new table OBSOLETE_HGNC_IDS
     improved logging
 
 2020-06-xx

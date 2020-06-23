@@ -14,6 +14,7 @@ Updates nomenclature of mouse genes based on file from MGI.
 Handles obsolete HGNC IDs for human genes. The logic is:
 
  * Download a file with obsoleted HGNC ids from HGNC FTP site.
+ * Refresh OBSOLETE_HGNC_IDS table from the downloaded file.
  * If a processed HGNC id is withdrawn, remove it from xdbs id of genes in RGD.
  * If a processed HGNC id is replaced by another HGNC id, update it accordingly in genes xdb ids.
    However, if the to be replaced HGNC id is already present in another active gene,
