@@ -1,5 +1,16 @@
+2020-06-22
+  obsoleteHgncIds
+    when merged-to-HGNC-ID is already assigned to another active human gene,
+      drop the obsolete HGNC-ID instead of merging it, and alert the user about it
+    the entire incoming data set is loaded into new table OBSOLETE_HGNC_IDS
+    improved logging
+
 2020-06-19
   added processMgiData.sh, and checking MGI's data with ours by updating it
+
+2020-06-xx
+  mgiIds: implemented nomenclature updates for mouse genes
+
 
 2020-06-03
   hgncIds: better handling of conflicts; improved logging

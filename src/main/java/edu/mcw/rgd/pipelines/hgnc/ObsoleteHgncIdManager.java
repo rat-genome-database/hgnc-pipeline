@@ -1,12 +1,15 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
 import edu.mcw.rgd.datamodel.Alias;
+import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +35,10 @@ public class ObsoleteHgncIdManager {
 
         long time0 = System.currentTimeMillis();
 
-        System.out.println(getVersion());
+        logDb.info(getVersion());
+        logDb.info("   "+dao.getConnectionInfo());
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        logDb.info("   started at "+sdt.format(new Date(time0)));
 
         FileDownloader downloader = new FileDownloader();
         downloader.setExternalFile(getObsoleteHgncIdFile());
@@ -52,9 +58,15 @@ public class ObsoleteHgncIdManager {
 
             String[] cols = line.split("[\\t]", -1);
             String obsoleteHgncId = cols[0];
+            String status = cols[1];
+            String withdrawnSymbol = cols[2];
+            String mergedIntoReport = cols[3];
+
+            updateObsoleteHgncIdsTable(obsoleteHgncId, status, withdrawnSymbol, mergedIntoReport);
+
             String mergedToHgncId = null;
-            if( !Utils.isStringEmpty(cols[3]) ) {
-                String[] mergeInfo = cols[3].split("[\\|]", -1);
+            if( !Utils.isStringEmpty(mergedIntoReport) ) {
+                String[] mergeInfo = mergedIntoReport.split("[\\|]", -1);
                 mergedToHgncId = mergeInfo[0];
                 mergedHgncIdsProcessed++;
             } else {
@@ -65,17 +77,17 @@ public class ObsoleteHgncIdManager {
         }
         reader.close();
 
-        System.out.println("Processed obsolete HGNC ids: "+obsoleteHgncIdsProcessed);
-        System.out.println(" -- withdrawn HGNC ids: "+withdrawnHgncIdsProcessed);
-        System.out.println(" -- merged HGNC ids: "+mergedHgncIdsProcessed);
+        logDb.info("Processed obsolete HGNC ids: "+obsoleteHgncIdsProcessed);
+        logDb.info(" -- withdrawn HGNC ids: "+withdrawnHgncIdsProcessed);
+        logDb.info(" -- merged HGNC ids: "+mergedHgncIdsProcessed);
 
         if( hgncIdsDeletedInRgd!=0 ) {
-            System.out.println("HGNC ID deleted from RGD db: " + hgncIdsDeletedInRgd);
+            logDb.info("HGNC ID deleted from RGD db: " + hgncIdsDeletedInRgd);
         }
         if( hgncIdsReplacedInRgd!=0 ) {
-            System.out.println("HGNC ID replaced in RGD db: " + hgncIdsReplacedInRgd);
+            logDb.info("HGNC ID replaced in RGD db: " + hgncIdsReplacedInRgd);
         }
-        System.out.println("Processing of obsolete HGNC ids complete: "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+        logDb.info("Processing of obsolete HGNC ids complete: "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
     }
 
     void updateRgdDb(String obsoleteHgncId, String mergedToHgncId) throws Exception {
@@ -84,8 +96,37 @@ public class ObsoleteHgncIdManager {
         filter.setAccId(obsoleteHgncId);
         filter.setXdbKey(XdbId.XDB_KEY_HGNC);
 
-        List<XdbId> xdbIds = dao.getXdbIds(filter);
+        List<XdbId> xdbIds = dao.getXdbIds(filter, SpeciesType.HUMAN);
         for( XdbId id: xdbIds ) {
+
+            if( mergedToHgncId!=null ) {
+                // QC: replace HGNC id only if there is no other gene having the same target HGNC ID
+                filter.setAccId(mergedToHgncId);
+                List<XdbId> genesWithMergedToHgncId = dao.getXdbIds(filter, SpeciesType.HUMAN);
+                Gene otherActiveGeneWithSameTargetHgncId = null;
+                for( XdbId mergedToXdbId: genesWithMergedToHgncId ) {
+                    if( mergedToXdbId.getRgdId()!=id.getRgdId() ) {
+                        // check if the object with merged-to-HGNC-ID is an active gene
+                        List<Gene> genes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, mergedToHgncId);
+                        for( Gene g: genes ) {
+                            if( g.getRgdId()==mergedToXdbId.getRgdId() ) {
+                                otherActiveGeneWithSameTargetHgncId = g;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if( otherActiveGeneWithSameTargetHgncId!=null ) {
+                    // there is another active gene (gene different than gene with source HGNC ID)
+                    // having the same merged-to HGNC ID; that means a conflict
+                    // and thus we remove the obsolete HGNC ID to avoid having two active genes with the same HGNC ID
+                    Gene g = otherActiveGeneWithSameTargetHgncId;
+                    logDb.info("CONFLICT: obsolete "+obsoleteHgncId+" may not be replaced with "+mergedToHgncId);
+                    logDb.info("   for gene RGD:"+id.getRgdId()+" because there is another active gene "+g.getSymbol()+" (RGD:"+ g.getRgdId()+")");
+                    logDb.info("   already associated with "+mergedToHgncId);
+                    mergedToHgncId = null;
+                }
+            }
 
             if( mergedToHgncId!=null ) {
                 // replace HGNC id
@@ -117,6 +158,22 @@ public class ObsoleteHgncIdManager {
             alias.setValue(obsoleteHgncId);
             alias.setNotes("created by ObsoleteHgncId pipeline");
             dao.insertAlias(alias);
+        }
+    }
+
+    void updateObsoleteHgncIdsTable(String obsoleteHgncId, String status, String withdrawnSymbol, String mergedIntoReport) throws Exception {
+
+        ObsoleteHgncId o = dao.getObsoleteHgncId(obsoleteHgncId);
+        if( o==null ) {
+            dao.insertObsoleteHgncId(obsoleteHgncId, status, withdrawnSymbol, mergedIntoReport);
+        } else {
+            // check if any properties changed
+            boolean matches = Utils.stringsAreEqual(o.getStatus(), status) &&
+                    Utils.stringsAreEqual(o.getWithdrawnSymbol(), withdrawnSymbol) &&
+                    Utils.stringsAreEqual(o.getMergedIntoReport(), mergedIntoReport);
+            if( !matches ) {
+                dao.updateObsoleteHgncId(obsoleteHgncId, status, withdrawnSymbol, mergedIntoReport);
+            }
         }
     }
 
