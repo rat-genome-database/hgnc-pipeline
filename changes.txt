@@ -1,3 +1,6 @@
+2020-06-19
+  added processMgiData.sh, and checking MGI's data with ours by updating it
+
 2020-06-03
   hgncIds: better handling of conflicts; improved logging
 
