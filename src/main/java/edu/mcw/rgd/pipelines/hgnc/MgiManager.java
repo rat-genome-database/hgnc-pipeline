@@ -58,12 +58,11 @@ public class MgiManager {
         }
         checkDatabase(allData);
         logger.info('\n');
-        logger.info("   Final amount that are not in RGD: "+DNE);
-        logger.info("   Final amount that do not have a symbol: "+nullSymbol);
-        logger.info("   Nomen Events that changed: "+nomenEvents);
-        int total = DNE + nullSymbol+nomenEvents;
-        logger.info("   Total amount that differed: "+total);
-        logger.info("   Amount that have not changed: "+noChange);
+        logger.info("   Final amount that are not in RGD: " + DNE);
+        logger.info("   Final amount that do not have a symbol: " + nullSymbol);
+        logger.info("   Nomen Events that changed: " + nomenEvents);
+        logger.info("   Total Conflicts found: " + conflicts.size());
+        logger.info("   Amount that have not changed: " + noChange);
 
     }
 
