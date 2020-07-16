@@ -18,7 +18,7 @@ public class MgiManager {
     int mgdXdbKey;
     int refKey;
     Logger logger = Logger.getLogger("mgi_logger");
-    int nomenEvents = 0, nullSymbol = 0, DNE = 0, noChange = 0;
+    int nomenEvents = 0, nullSymbol = 0, DNE = 0, noChange = 0, conTotal = 0;
     Map<String,Gene> conflicts = new HashMap<>();
 
     public void run() throws Exception {
@@ -61,7 +61,7 @@ public class MgiManager {
         logger.info("   Final amount that are not in RGD: " + DNE);
         logger.info("   Final amount that do not have a symbol: " + nullSymbol);
         logger.info("   Nomen Events that changed: " + nomenEvents);
-        logger.info("   Total Conflicts found: " + conflicts.size());
+        logger.info("   Total Conflicts found: " + conTotal);
         logger.info("   Amount that have not changed: " + noChange);
 
     }
@@ -96,6 +96,7 @@ public class MgiManager {
                             }
                             logger.info("Conflict with RGD_ID: "+gene.getRgdId()+", MGI Accession: "+mgi.getAccessionId()+"   Gene: "+gene.getSymbol()+"; "+gene.getName()+
                                     " -- Mgi: "+mgi.getMarkerSymbol()+"; "+mgi.getMarkerName());
+                            conTotal++;
                         }
                     }
                     else { // symbols are the same
@@ -103,10 +104,12 @@ public class MgiManager {
                     }
                 }// end gene for
             }
-            if(conflictMgi(mgi.getAccessionId()))
+            if(conflictMgi(mgi.getAccessionId())) {
                 logger.info("Conflict with RGD_ID: " + conflicts.get(mgi.getAccessionId()).getRgdId() + ", MGI Accession: " + mgi.getAccessionId() +
                         "   Gene: " + conflicts.get(mgi.getAccessionId()).getSymbol() + "; " + conflicts.get(mgi.getAccessionId()).getName()
                         + " -- Mgi: " + mgi.getMarkerSymbol() + "; " + mgi.getMarkerName());
+                conTotal++;
+            }
         }// end mgi for
     }
 
