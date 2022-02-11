@@ -3,7 +3,8 @@ package edu.mcw.rgd.pipelines.hgnc;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -20,9 +21,9 @@ public class HgncIdManager {
     private String pigVgncIdFile;
     private int refKey;
     private Dao dao = new Dao();
-    Logger logDb = Logger.getLogger("hgnc_ids");
-    Logger logNoMatch = Logger.getLogger("no_match");
-    Logger logMultiMatch = Logger.getLogger("multi_match");
+    Logger logDb = LogManager.getLogger("hgnc_ids");
+    Logger logNoMatch = LogManager.getLogger("no_match");
+    Logger logMultiMatch = LogManager.getLogger("multi_match");
 
     public void run() throws Exception {
 

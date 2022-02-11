@@ -6,7 +6,8 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.text.SimpleDateFormat;
@@ -29,7 +30,7 @@ public class ObsoleteHgncIdManager {
     int hgncIdsDeletedInRgd = 0;
     int hgncIdsReplacedInRgd = 0;
 
-    Logger logDb = Logger.getLogger("obsolete_hgnc_ids");
+    Logger logDb = LogManager.getLogger("obsolete_hgnc_ids");
 
     public void run() throws Exception {
 

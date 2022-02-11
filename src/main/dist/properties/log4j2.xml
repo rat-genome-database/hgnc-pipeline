@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/> -->
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] %msg%n"/>
+        </Console>
+
+        <RollingFile name="status" append="true" fileName="logs/status.log" filePattern="logs/status.log.%d{yyyy-MM}">
+            <PatternLayout pattern="%d{yyyy-MM-hh HH:mm:ss} %p [%c] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="summary" append="false" fileName="logs/summary.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+        <RollingFile name="detail" append="true" fileName="logs/detail.log" filePattern="logs/detail.log.%d{yyyy-MM}">
+            <PatternLayout pattern="%d{yyyy-MM-hh HH:mm:ss} %p [%c] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+
+
+        <RollingFile name="hgnc_ids" append="true" fileName="logs/hgnc_ids.log" filePattern="logs/hgnc_ids.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="hgnc_ids_summary" append="false" fileName="logs/hgnc_ids_summary.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+
+        <RollingFile name="obsolete_hgnc_ids" append="true" fileName="logs/obsolete_hgnc_ids.log" filePattern="logs/obsolete_hgnc_ids.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="obsolete_hgnc_ids_summary" append="false" fileName="logs/obsolete_hgnc_ids_summary.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+
+        <RollingFile name="no_match" append="true" fileName="logs/no_match.log" filePattern="logs/no_match.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="multi_match" append="true" fileName="logs/multi_match.log" filePattern="logs/multi_match.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="nomen_events" append="true" fileName="logs/nomen_events.log" filePattern="logs/nomen_events.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="aliases" append="true" fileName="logs/aliases.log" filePattern="logs/aliases.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="mgi_logger" append="true" fileName="logs/mgi_logger.log" filePattern="logs/mgi_logger.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <!-- daily -->
+        <Logger name="status" level="debug" additivity="false">
+            <AppenderRef ref="status" level="info"/>
+            <AppenderRef ref="summary" level="info"/><!-- human readable -->
+            <AppenderRef ref="detail"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+
+        <!-- monthly -->
+        <Logger name="hgnc_ids" level="debug" additivity="false">
+            <AppenderRef ref="hgnc_ids"/>
+            <AppenderRef ref="hgnc_ids_summary" level="info"/><!-- human readable -->
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+
+        <Logger name="obsolete_hgnc_ids" level="debug" additivity="false">
+            <AppenderRef ref="obsolete_hgnc_ids"/>
+            <AppenderRef ref="obsolete_hgnc_ids_summary" level="info"/><!-- human readable -->
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+
+        <Logger name="no_match" level="debug" additivity="false">
+            <AppenderRef ref="no_match"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="multi_match" level="debug" additivity="false">
+            <AppenderRef ref="multi_match"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="nomen_events" level="debug" additivity="false">
+            <AppenderRef ref="nomen_events"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="aliases" level="debug" additivity="false">
+            <AppenderRef ref="aliases"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="mgi_logger" level="debug" additivity="false">
+            <AppenderRef ref="mgi_logger"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+    </Loggers>
+</Configuration>
