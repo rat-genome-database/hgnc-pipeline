@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shell script to run Hgnc pipeline
 . /etc/profile
 
 APPNAME=HgncPipeline
@@ -12,9 +11,6 @@ if [ "$SERVER" == "REED" ]; then
 fi
 cd $APPDIR
 
-java -Dspring.config=$APPDIR/../properties/default_db2.xml \
-    -Dlog4j.configuration=file://$APPDIR/properties/log4j.properties \
-    -jar lib/$APPNAME.jar --processHgncIds > $APPDIR/hgncIds.log
-
+$APPDIR/_run.sh --processHgncIds > $APPDIR/hgncIds.log
 
 mailx -s "[$SERVER] HgncDataPipeline OK!" $EMAILLIST < $APPDIR/logs/hgnc_ids_summary.log

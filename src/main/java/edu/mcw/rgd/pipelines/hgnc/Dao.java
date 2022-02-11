@@ -7,7 +7,8 @@ import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.datamodel.XdbId;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
@@ -16,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,8 +31,8 @@ public class Dao extends AbstractDAO{
     private AliasDAO aliasDAO = new AliasDAO();
     private GeneDAO geneDAO = new GeneDAO();
 
-    Logger logAliases = Logger.getLogger("aliases");
-    Logger logNomenEvents = Logger.getLogger("nomen_events");
+    Logger logAliases = LogManager.getLogger("aliases");
+    Logger logNomenEvents = LogManager.getLogger("nomen_events");
 
     /**
      * get active genes with given external id

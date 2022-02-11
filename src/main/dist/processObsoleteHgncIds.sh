@@ -12,9 +12,7 @@ fi
 
 cd $APPDIR
 
-java -Dspring.config=$APPDIR/../properties/default_db2.xml \
-    -Dlog4j.configuration=file://$APPDIR/properties/log4j.properties \
-    -jar lib/$APPNAME.jar  --processObsoleteHgncIds
+$APPDIR/_run.sh --processObsoleteHgncIds
 
 mailx -s "[$SERVER] Obsolete Hgnc Ids OK!" $EMAILLIST < $APPDIR/logs/obsolete_hgnc_ids_summary.log
 

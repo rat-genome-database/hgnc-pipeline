@@ -1,3 +1,6 @@
+2022-02-10
+  upgraded log4j to avoid zero day exploit
+
 2020-06-22
   obsoleteHgncIds
     when merged-to-HGNC-ID is already assigned to another active human gene,
