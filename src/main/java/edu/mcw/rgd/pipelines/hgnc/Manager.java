@@ -1,6 +1,8 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
-import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.process.Utils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -8,14 +10,21 @@ import org.springframework.core.io.FileSystemResource;
 /**
  * @author mtutaj
  * @since 12/22/11
- * Load gene families from HGNC site
  */
 public class Manager {
+
+    Logger log = LogManager.getLogger("status");
 
     public static void main(String[] args) throws Exception {
 
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
+
+        Manager manager = new Manager();
+        manager.run(args, bf);
+    }
+
+    void run(String[] args, DefaultListableBeanFactory bf) throws Exception {
 
         try {
 
@@ -41,7 +50,7 @@ public class Manager {
             }
 
         } catch(Exception e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, log);
             throw e;
         }
     }
