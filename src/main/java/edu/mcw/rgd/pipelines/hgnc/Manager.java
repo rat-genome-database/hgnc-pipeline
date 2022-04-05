@@ -10,21 +10,16 @@ import org.springframework.core.io.FileSystemResource;
 /**
  * @author mtutaj
  * @since 12/22/11
+ * Load gene families from HGNC site
  */
 public class Manager {
 
-    Logger log = LogManager.getLogger("status");
+    static Logger logger = LogManager.getLogger("status");
 
     public static void main(String[] args) throws Exception {
 
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
-
-        Manager manager = new Manager();
-        manager.run(args, bf);
-    }
-
-    void run(String[] args, DefaultListableBeanFactory bf) throws Exception {
 
         try {
 
@@ -50,7 +45,7 @@ public class Manager {
             }
 
         } catch(Exception e) {
-            Utils.printStackTrace(e, log);
+            Utils.printStackTrace(e, logger);
             throw e;
         }
     }

@@ -25,6 +25,7 @@ public class MgiManager {
     public void run() throws Exception {
         long startTime = System.currentTimeMillis();
 
+        logger.info("");
         logger.info(getVersion());
         logger.info("   "+dao.getConnectionInfo());
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
