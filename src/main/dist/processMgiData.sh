@@ -13,4 +13,4 @@ cd $APPDIR
 
 $APPDIR/_run.sh --processMgiData > $APPDIR/mgi_logger.log
 
-mailx -s "[$SERVER] HgncDataPipeline for mouse OK!" $EMAILLIST < $APPDIR/logs/mgi_logger.log
+mailx -s "[$SERVER] HgncDataPipeline for mouse OK!" $EMAILLIST < $APPDIR/logs/mgi_summary.log

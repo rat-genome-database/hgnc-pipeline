@@ -70,12 +70,17 @@
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
         </RollingFile>
+
         <RollingFile name="mgi_logger" append="true" fileName="logs/mgi_logger.log" filePattern="logs/mgi_logger.log.%d{yyyy-MM}">
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
         </RollingFile>
+        <File name="mgi_summary" append="false" fileName="logs/mgi_summary.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
     </Appenders>
 
     <Loggers>
@@ -119,8 +124,10 @@
             <AppenderRef ref="aliases"/>
             <AppenderRef ref="Console" level="info"/>
         </Logger>
+
         <Logger name="mgi_logger" level="debug" additivity="false">
             <AppenderRef ref="mgi_logger"/>
+            <AppenderRef ref="mgi_summary" level="info"/><!-- human readable -->
             <AppenderRef ref="Console" level="info"/>
         </Logger>
     </Loggers>
