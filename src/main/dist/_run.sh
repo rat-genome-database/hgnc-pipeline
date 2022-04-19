@@ -2,7 +2,7 @@
 # shell script to run Hgnc pipeline
 . /etc/profile
 
-APPNAME=HgncPipeline
+APPNAME="hgnc-pipeline"
 APPDIR=/home/rgddata/pipelines/$APPNAME
 
 cd $APPDIR
