@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 . /etc/profile
 
-APPNAME=HgncPipeline
+APPNAME="hgnc-pipeline"
 APPDIR=/home/rgddata/pipelines/$APPNAME
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 

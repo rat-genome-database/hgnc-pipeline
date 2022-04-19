@@ -1,3 +1,6 @@
+Apr 19, 2022
+  renamed distro to 'hgnc-pipeline'
+
 Apr 05, 2022
   improved exception logging
 
