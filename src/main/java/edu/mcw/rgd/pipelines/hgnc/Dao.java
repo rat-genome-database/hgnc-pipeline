@@ -2,7 +2,6 @@ package edu.mcw.rgd.pipelines.hgnc;
 
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.impl.*;
-import edu.mcw.rgd.dao.spring.GeneQuery;
 import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
@@ -107,9 +106,7 @@ public class Dao extends AbstractDAO{
     }
 
     List<Gene> getActiveGenesById(String accId, int xdbKey, String srcPipeline) throws Exception {
-        String sql = "SELECT DISTINCT g.*, r.species_type_key FROM genes g, rgd_ids r, rgd_acc_xdb x WHERE r.rgd_id=g.rgd_id AND x.rgd_id=g.rgd_id " +
-                "AND r.object_key = 1 AND x.XDB_KEY=? AND x.ACC_ID=? AND r.OBJECT_STATUS='ACTIVE' AND x.src_pipeline=?";
-        return  GeneQuery.execute(this,sql, xdbKey, accId, srcPipeline);
+        return xdbIdDAO.getActiveGenesByXdbId(xdbKey, accId, srcPipeline);
     }
 
     public List<XdbId> getXdbIdsByRgdId(int xdbKey, int rgdId) throws Exception {
