@@ -19,7 +19,7 @@ public class MgiManager {
     int mgdXdbKey;
     int refKey;
     Logger logger = LogManager.getLogger("mgi_logger");
-    int nomenEvents = 0, nullSymbol = 0, DNE = 0, noChange = 0, conTotal = 0;
+    int nomenEvents = 0, nullSymbol = 0, mgiNotInRgd = 0, noChange = 0, conTotal = 0;
     Map<String,Gene> conflicts = new HashMap<>();
 
     public void run() throws Exception {
@@ -31,13 +31,13 @@ public class MgiManager {
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         logger.info("   started at "+sdt.format(new Date(startTime)));
 
-        String mgiFile = downloadEvaVcfFile(getMgiDataFile());
+        String mgiFile = downloadMgiFile(getMgiDataFile());
         logger.info("   -- Parsing data from Informatics MGI file --\n");
         parseFile(mgiFile);
 
         long endTime = System.currentTimeMillis();
-        logger.info("   Ended at "+sdt.format(new Date(endTime)));
-        logger.info("   -- HGNC pipeline for MGI data end --");
+        logger.info("Ended at "+sdt.format(new Date(endTime))+",   elapsed "+Utils.formatElapsedTime(startTime, endTime));
+        logger.info("-- HGNC pipeline for MGI data end --");
     }
 
     void parseFile(String fileName) throws Exception{
@@ -60,7 +60,7 @@ public class MgiManager {
         }
         checkDatabase(allData);
         logger.info('\n');
-        logger.info("   Final amount that are not in RGD: " + DNE);
+        logger.info("   Lines with MGI ids not in RGD: " + mgiNotInRgd);
         logger.info("   Final amount that do not have a symbol: " + nullSymbol);
         logger.info("   Nomen Events that changed: " + nomenEvents);
         logger.info("   Total Conflicts found: " + conTotal);
@@ -68,7 +68,7 @@ public class MgiManager {
 
     }
 
-    String downloadEvaVcfFile(String file) throws Exception{
+    String downloadMgiFile(String file) throws Exception{
         FileDownloader downloader = new FileDownloader();
         downloader.setExternalFile(file);
         downloader.setLocalFile("data/MgiData.rpt");
@@ -81,7 +81,7 @@ public class MgiManager {
         for(Mgi mgi : data){
             List<Gene> dbGene = dao.getActiveGenesByXdbId(getMgdXdbKey(), mgi.getAccessionId());
             if(dbGene.isEmpty())
-                DNE++;
+                mgiNotInRgd++;
             else{
                 for(Gene gene: dbGene){
                     if(gene.getSymbol()==null)
@@ -203,8 +203,7 @@ public class MgiManager {
         }
         return false;
     }
-    boolean conflictMgi(String accId)
-    {
+    boolean conflictMgi(String accId) {
            if(conflicts.get(accId) != null)
                 return true;
         return false;
