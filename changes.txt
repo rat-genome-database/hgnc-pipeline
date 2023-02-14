@@ -1,3 +1,6 @@
+Feb 14, 2023
+  updated build.gradle to be gradle 6.x + compatible
+
 Aug 02, 2022
   MgiIds: improved summary logging
 
