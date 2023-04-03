@@ -31,8 +31,6 @@ public class Manager {
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
 
         try {
-            test();
-
             // process cmdline params
             for( int i=0; i<args.length; i++ ) {
                 switch(args[i]) {
@@ -60,6 +58,7 @@ public class Manager {
         }
     }
 
+    /*
     static void test() throws Exception {
 
         BufferedReader in = Utils.openReader("/tmp/snpEff_genes_joint72.txt");
@@ -102,4 +101,5 @@ public class Manager {
 
         System.exit(0);
     }
+    */
 }
