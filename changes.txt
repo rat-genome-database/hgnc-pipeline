@@ -1,3 +1,6 @@
+Apr 03, 2023
+  removed Harika from email list -- Harika is no longer with RGD
+
 Feb 14, 2023
   updated build.gradle to be gradle 6.x + compatible
 
