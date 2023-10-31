@@ -14,7 +14,7 @@
     </bean>
 
     <bean id="MgiManager" class="edu.mcw.rgd.pipelines.hgnc.MgiManager">
-        <property name="version" value="MgiManager  -- build Aug 02, 2022"/>
+        <property name="version" value="MgiManager  -- build Oct 31, 2023"/>
         <property name="mgiDataFile" value="http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt"/>
         <property name="mgdXdbKey" value="5"/>
        <property name="refKey" value="134636" /> <!-- value="133851" for dev use-->

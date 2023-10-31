@@ -1,3 +1,6 @@
+Oct 31, 2023
+  updated to java 17
+
 Apr 03, 2023
   removed Harika from email list -- Harika is no longer with RGD
 
