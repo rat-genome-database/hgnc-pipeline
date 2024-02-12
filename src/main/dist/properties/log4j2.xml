@@ -87,15 +87,7 @@
         <Root level="INFO">
             <AppenderRef ref="Console"/>
         </Root>
-        <!-- daily -->
-        <Logger name="status" level="debug" additivity="false">
-            <AppenderRef ref="status" level="info"/>
-            <AppenderRef ref="summary" level="info"/><!-- human readable -->
-            <AppenderRef ref="detail"/>
-            <AppenderRef ref="Console" level="info"/>
-        </Logger>
 
-        <!-- monthly -->
         <Logger name="hgnc_ids" level="debug" additivity="false">
             <AppenderRef ref="hgnc_ids"/>
             <AppenderRef ref="hgnc_ids_summary" level="info"/><!-- human readable -->

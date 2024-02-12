@@ -1,5 +1,6 @@
 Feb 12, 2024
   MgiIds: simplified code
+  simplified logging
 
 Jan 08, 2024
   renamed 'master' to 'main'
