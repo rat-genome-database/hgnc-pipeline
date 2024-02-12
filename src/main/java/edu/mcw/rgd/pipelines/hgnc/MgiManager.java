@@ -44,20 +44,13 @@ public class MgiManager {
 
         BufferedReader br = Utils.openReader(fileName);
         String lineData;
-        String firstLine;
         List<Mgi> allData = new ArrayList<>();
-        int i =0;
-        firstLine = br.readLine();
+        String firstLine = br.readLine();
         String[] col = firstLine.split("\t");
-        while((lineData = br.readLine()) != null) {
-            allData.add(createMgi(lineData, col));
-            i++;
-            if(i==50000){
-                checkDatabase(allData);
-                i=0;
-                allData.clear();
-            }
+        while( (lineData = br.readLine()) != null ) {
+            allData.add( createMgi(lineData, col) );
         }
+
         checkDatabase(allData);
         logger.info('\n');
         logger.info("   Lines with MGI ids not in RGD: " + mgiNotInRgd);
@@ -65,7 +58,6 @@ public class MgiManager {
         logger.info("   Nomen Events that changed: " + nomenEvents);
         logger.info("   Total Conflicts found: " + conTotal);
         logger.info("   Amount that have not changed: " + noChange);
-
     }
 
     String downloadMgiFile(String file) throws Exception{
