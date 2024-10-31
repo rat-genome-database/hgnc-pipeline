@@ -1,3 +1,7 @@
+Oct 31, 2024
+  updated source url for human hgnc file
+  fixed qc logic -- added summaries for matching
+
 Feb 12, 2024
   MgiIds: simplified code
   simplified logging

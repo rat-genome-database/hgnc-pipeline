@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map;
 
 /**
  * @author hsnalabolu
@@ -50,6 +51,8 @@ public class HgncIdManager {
 
         HashMap<Integer,List<HgncGene>> geneMap = qc(speciesTypeKey, hgncGenes);
 
+        showMatchCounts(geneMap);
+
         int nomenEvents = 0;
         int genesModified = 0;
 
@@ -70,8 +73,8 @@ public class HgncIdManager {
             String previousName = g.gene.getName();
 
             if( Utils.stringsAreEqual(g.symbol, previousSymbol)
-                && Utils.stringsAreEqual(g.name, previousName)
-                && Utils.stringsAreEqual(g.gene.getNomenSource(), "HGNC") ) {
+                    && Utils.stringsAreEqual(g.name, previousName)
+                    && Utils.stringsAreEqual(g.gene.getNomenSource(), "HGNC") ) {
 
                 // everything up-to-date: continue to next line
                 continue;
@@ -88,6 +91,35 @@ public class HgncIdManager {
 
         logDb.info("   Number of "+ speciesName+" Genes Updated: "+ genesModified);
         logDb.info("   Number of "+ speciesName+" Nomen Events created: "+ nomenEvents);
+    }
+
+    void showMatchCounts( HashMap<Integer,List<HgncGene>> geneMap ) {
+
+        Map<String, Integer> matchCounts = new TreeMap<>();
+
+        for( List<HgncGene> list: geneMap.values() ) {
+
+            for( HgncGene g: list ) {
+
+                // match tier 1, by HGNC:9999: 1
+                // match tier 2, by NCBI:100130620 (HGNC:55137): 1
+                // match tier 3, by ENSEMBL:xxxxxx (HGNC:55137): 1
+                int colonPos = g.matchBy.indexOf(':');
+                String matchBy = g.matchBy.substring(0, colonPos);
+
+                Integer hitCount = matchCounts.get(matchBy);
+                if( hitCount==null ) {
+                    hitCount = 1;
+                } else {
+                    hitCount++;
+                }
+                matchCounts.put(matchBy, hitCount);
+            }
+        }
+
+        for( Map.Entry<String, Integer> entry: matchCounts.entrySet() ) {
+            logDb.info("   "+entry.getKey()+": "+entry.getValue());
+        }
     }
 
     public List<HgncGene> parseInputFile(int speciesTypeKey) throws Exception {
@@ -117,11 +149,11 @@ public class HgncIdManager {
 
             String[] cols = line.split("[\\t]", -1);
             HgncGene hgncGene = new HgncGene();
-            hgncGene.hgncId = cols[0].substring(5);
-            hgncGene.symbol = cols[1];
-            hgncGene.name = cols[2];
-            hgncGene.ncbiId = cols[18];
-            hgncGene.ensemblId = cols[19];
+            hgncGene.hgncId = cols[0].substring(5).trim();
+            hgncGene.symbol = cols[1].trim();
+            hgncGene.name = cols[2].trim();
+            hgncGene.ncbiId = cols[18].trim();
+            hgncGene.ensemblId = cols[19].trim();
 
             hgncGenes.add(hgncGene);
         }
@@ -165,23 +197,23 @@ public class HgncIdManager {
             g.matchBy = "";
             List<Gene> existingGenes;
             if( speciesTypeKey==SpeciesType.HUMAN ) {
-                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, g.hgncId);
+                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, acc);
             } else {
-                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_VGNC, g.hgncId);
+                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_VGNC, acc);
             }
             if( existingGenes.size() == 1 ) {
-                g.matchBy = "match by "+acc;
+                g.matchBy = "match tier 1, by "+acc;
             } else {
                 if( g.ncbiId != null ) {
                     existingGenes = dao.getActiveGenesByNcbiId(g.ncbiId);
                     if( existingGenes.size()==1 ) {
-                        g.matchBy = "match by NCBI:"+g.ncbiId+" ("+acc+")";
+                        g.matchBy = "match tier 2, by NCBI:"+g.ncbiId+" ("+acc+")";
                     }
                 }
                 if( existingGenes.size() != 1 && g.ensemblId != null ) {
                     existingGenes = dao.getActiveGenesByEnsemblId(g.ensemblId);
                     if (existingGenes.size() == 1) {
-                        g.matchBy = "match by " + g.ensemblId+" ("+acc+")";
+                        g.matchBy = "match tier 3, by ENSEMBL:" + g.ensemblId+" ("+acc+")";
                     }
                 }
             }

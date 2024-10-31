@@ -6,8 +6,8 @@
     </bean>
 
     <bean id="hgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.HgncIdManager">
-        <property name="version" value="HgncIdManager  -- build Apr 03, 2023" />
-        <property name="hgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt"/>
+        <property name="version" value="HgncIdManager  -- build Oct 30, 2024" />
+        <property name="hgncIdFile" value="https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt"/>
         <property name="dogVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/dog/dog_vgnc_gene_set_All.txt"/>
         <property name="pigVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/pig/pig_vgnc_gene_set_All.txt"/>
         <property name="refKey" value="133851" />
