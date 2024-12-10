@@ -1,3 +1,6 @@
+Dec 10, 2024
+  MgiIds: fixed loading of gene symbols/names from incoming file
+
 Oct 31, 2024
   updated source url for human hgnc file
   fixed qc logic -- added summaries for matching

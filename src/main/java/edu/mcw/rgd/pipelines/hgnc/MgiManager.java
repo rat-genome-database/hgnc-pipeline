@@ -114,43 +114,43 @@ public class MgiManager {
              switch (col[i]){
                  case "MGI Accession ID":
                      if(!line[i].isEmpty())
-                         data.setAccessionId(line[i]);
+                         data.setAccessionId(line[i].trim());
                      break;
                  case "Chr":
                      if(!line[i].isEmpty())
-                         data.setChr(line[i]);
+                         data.setChr(line[i].trim());
                      break;
                  case "cM Position":
                      if(!line[i].isEmpty())
-                        data.setPosition(line[i]);
+                        data.setPosition(line[i].trim());
                      break;
                  case "genome coordinate start":
                      if(!line[i].isEmpty())
-                         data.setGnomeStart(line[i]);
+                         data.setGnomeStart(line[i].trim());
                      break;
                  case "genome coordinate end":
                      if(!line[i].isEmpty())
-                        data.setGnomeEnd(line[i]);
+                        data.setGnomeEnd(line[i].trim());
                      break;
                  case "strand":
                      if(!line[i].isEmpty())
-                        data.setStrand(line[i]);
+                        data.setStrand(line[i].trim());
                      break;
                  case "Marker Symbol":
                      if(!line[i].isEmpty())
-                         data.setMarkerSymbol(line[i]);
+                         data.setMarkerSymbol(line[i].trim());
                      break;
                  case "Status":
                      if(!line[i].isEmpty())
-                         data.setStatus(line[i]);
+                         data.setStatus(line[i].trim());
                      break;
                  case "Marker Name":
                      if(!line[i].isEmpty())
-                         data.setMarkerName(line[i]);
+                         data.setMarkerName(line[i].trim());
                      break;
                  case "Marker Type":
                      if(!line[i].isEmpty())
-                         data.setMarkerType(line[i]);
+                         data.setMarkerType(line[i].trim());
                      break;
                  case "Feature Type":
                      if(!line[i].isEmpty())
@@ -159,7 +159,7 @@ public class MgiManager {
                  case "Marker Synonyms (pipe-separated)":
                      if(line.length == 12)
                          if(!line[i].isEmpty())
-                            data.setSynonyms(line[i]);
+                            data.setSynonyms(line[i].trim());
                      break;
              }
          }
