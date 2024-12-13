@@ -1,3 +1,6 @@
+Dec 13, 2024
+  updated jdbc driver to ojdbc10
+
 Dec 10, 2024
   MgiIds: fixed loading of gene symbols/names from incoming file
 
