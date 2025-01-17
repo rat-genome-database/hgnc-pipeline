@@ -1,3 +1,6 @@
+Jan 17, 2025
+  hgnc pipeline: added qc to display genes that are no longer processed by the pipeline
+
 Dec 13, 2024
   updated jdbc driver to ojdbc10
 

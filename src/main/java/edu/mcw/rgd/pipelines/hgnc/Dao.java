@@ -2,6 +2,7 @@ package edu.mcw.rgd.pipelines.hgnc;
 
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.impl.*;
+import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
@@ -16,7 +17,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author mtutaj
@@ -42,6 +45,13 @@ public class Dao extends AbstractDAO{
      */
     public List<Gene> getActiveGenesByXdbId(int xdbKey, String accId) throws Exception {
         return xdbIdDAO.getActiveGenesByXdbId(xdbKey, accId);
+    }
+
+    public Set<Integer> getGeneRgdIdsForNomenSource(int speciesTypeKey, String nomenSource ) throws Exception {
+
+        String sql = "SELECT g.rgd_id FROM genes g,rgd_ids i WHERE i.rgd_id=g.rgd_id AND species_type_key=? AND nomen_source=? AND object_status='ACTIVE'";
+        List<Integer> list = IntListQuery.execute(geneDAO, sql, speciesTypeKey, nomenSource);
+        return new HashSet<>(list);
     }
 
     /**

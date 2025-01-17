@@ -26,6 +26,8 @@ public class HgncIdManager {
     Logger logNoMatch = LogManager.getLogger("no_match");
     Logger logMultiMatch = LogManager.getLogger("multi_match");
 
+    static private String NOMEN_SOURCE = "HGNC";
+
     public void run() throws Exception {
 
         long startTime = System.currentTimeMillis();
@@ -74,7 +76,7 @@ public class HgncIdManager {
 
             if( Utils.stringsAreEqual(g.symbol, previousSymbol)
                     && Utils.stringsAreEqual(g.name, previousName)
-                    && Utils.stringsAreEqual(g.gene.getNomenSource(), "HGNC") ) {
+                    && Utils.stringsAreEqual(g.gene.getNomenSource(), NOMEN_SOURCE) ) {
 
                 // everything up-to-date: continue to next line
                 continue;
@@ -82,7 +84,7 @@ public class HgncIdManager {
 
             g.gene.setSymbol(g.symbol);
             g.gene.setName(g.name);
-            g.gene.setNomenSource("HGNC");
+            g.gene.setNomenSource(NOMEN_SOURCE);
             if( updateGene(g.gene, previousSymbol, previousName, g.matchBy) ) {
                 nomenEvents++;
             }
@@ -91,6 +93,16 @@ public class HgncIdManager {
 
         logDb.info("   Number of "+ speciesName+" Genes Updated: "+ genesModified);
         logDb.info("   Number of "+ speciesName+" Nomen Events created: "+ nomenEvents);
+
+
+        Set<Integer> geneRgdIdsWithHgncNomenSource = dao.getGeneRgdIdsForNomenSource(speciesTypeKey, NOMEN_SOURCE);
+        Set<Integer> orphanedRgdIdsWithHgncNomenSource = new HashSet<>(geneRgdIdsWithHgncNomenSource);
+        orphanedRgdIdsWithHgncNomenSource.removeAll( geneMap.keySet() );
+        logDb.info("   Orphaned RGD IDs with HGNC nomen source: "+orphanedRgdIdsWithHgncNomenSource.size() );
+        /*
+        for( Integer rgdId: orphanedRgdIdsWithHgncNomenSource ) {
+            logDb.info("      "+rgdId);
+        }*/
     }
 
     void showMatchCounts( HashMap<Integer,List<HgncGene>> geneMap ) {
