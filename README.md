@@ -5,6 +5,10 @@
 Updates nomenclature of human genes based on HGNC ID file from HGNC.
 Also updates nomenclature for dog and pig genes based on VGNC ID file from HGNC.
 
+Post-processing: clears (sets to NULL) NOMEN_SOURCE field for those genes that once were handled by the pipeline
+(NOMEN_SOURCE='HGNC') but which are no longer handled by the pipeline. That allows other pipelines
+(NCBI gene pipeline and Ensembl gene pipeline) to handle nomenclature for those genes.
+
 ##Module 'MGI Nomenclature'
 
 Updates nomenclature of mouse genes based on file from MGI.

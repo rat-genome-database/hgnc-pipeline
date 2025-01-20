@@ -21,12 +21,12 @@ public class HgncIdManager {
     private String dogVgncIdFile;
     private String pigVgncIdFile;
     private int refKey;
-    private Dao dao = new Dao();
+    private final Dao dao = new Dao();
     Logger logDb = LogManager.getLogger("hgnc_ids");
     Logger logNoMatch = LogManager.getLogger("no_match");
     Logger logMultiMatch = LogManager.getLogger("multi_match");
 
-    static private String NOMEN_SOURCE = "HGNC";
+    static private final String NOMEN_SOURCE = "HGNC";
 
     public void run() throws Exception {
 
@@ -99,10 +99,13 @@ public class HgncIdManager {
         Set<Integer> orphanedRgdIdsWithHgncNomenSource = new HashSet<>(geneRgdIdsWithHgncNomenSource);
         orphanedRgdIdsWithHgncNomenSource.removeAll( geneMap.keySet() );
         logDb.info("   Orphaned RGD IDs with HGNC nomen source: "+orphanedRgdIdsWithHgncNomenSource.size() );
-        /*
+        int counfOfNomenSourceCleared = 0;
         for( Integer rgdId: orphanedRgdIdsWithHgncNomenSource ) {
-            logDb.info("      "+rgdId);
-        }*/
+            if( dao.clearNomenSourceForGene(rgdId, NOMEN_SOURCE) ) {
+                counfOfNomenSourceCleared++;
+            }
+        }
+        logDb.info("   Orphaned RGD IDs with HGNC nomen source cleared (set to NULL): "+counfOfNomenSourceCleared );
     }
 
     void showMatchCounts( HashMap<Integer,List<HgncGene>> geneMap ) {

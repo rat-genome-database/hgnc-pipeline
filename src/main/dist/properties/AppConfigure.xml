@@ -1,12 +1,12 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
     <bean id="obsoleteHgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.ObsoleteHgncIdManager">
-        <property name="version" value="ObsoleteHgncIdManager  -- build Jan 17, 2025" />
+        <property name="version" value="ObsoleteHgncIdManager  -- build Jan 20, 2025" />
         <property name="obsoleteHgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/withdrawn.txt"/>
     </bean>
 
     <bean id="hgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.HgncIdManager">
-        <property name="version" value="HgncIdManager  -- build Jan 17, 2025" />
+        <property name="version" value="HgncIdManager  -- build Jan 20, 2025" />
         <property name="hgncIdFile" value="https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt"/>
         <property name="dogVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/dog/dog_vgnc_gene_set_All.txt"/>
         <property name="pigVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/pig/pig_vgnc_gene_set_All.txt"/>

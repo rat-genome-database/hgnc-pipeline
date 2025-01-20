@@ -35,6 +35,7 @@ public class Dao extends AbstractDAO{
 
     Logger logAliases = LogManager.getLogger("aliases");
     Logger logNomenEvents = LogManager.getLogger("nomen_events");
+    Logger logNomenSource = LogManager.getLogger("nomen_source");
 
     /**
      * get active genes with given external id
@@ -52,6 +53,18 @@ public class Dao extends AbstractDAO{
         String sql = "SELECT g.rgd_id FROM genes g,rgd_ids i WHERE i.rgd_id=g.rgd_id AND species_type_key=? AND nomen_source=? AND object_status='ACTIVE'";
         List<Integer> list = IntListQuery.execute(geneDAO, sql, speciesTypeKey, nomenSource);
         return new HashSet<>(list);
+    }
+
+    public boolean clearNomenSourceForGene( int geneRgdId, String oldNomenSource ) throws Exception {
+
+        String sql = "UPDATE genes SET nomen_source=NULL WHERE rgd_id=? AND nomen_source=?";
+        int r = geneDAO.update(sql, geneRgdId, oldNomenSource);
+        if( r!=0 ) {
+            logNomenSource.info("NOMEN_SOURCE cleared for gene RGD:"+geneRgdId);
+        } else {
+            logNomenSource.warn("*** UNEXPECTED! failed to clear NOMEN_SOURCE for gene RGD:"+geneRgdId);
+        }
+        return r!=0;
     }
 
     /**
