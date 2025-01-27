@@ -8,7 +8,9 @@ import edu.mcw.rgd.datamodel.SpeciesType;
  */
 public class HgncGene {
 
-    public String hgncId;
+    public int taxonId;
+    public int speciesTypeKey;
+    public String hgncId; // or vgncId
     public String symbol;
     public String name;
     public String ncbiId;
@@ -16,8 +18,4 @@ public class HgncGene {
 
     public Gene gene; // matching gene in rgd
     public String matchBy; // how the match was made
-
-    public String getFullAcc(int speciesTypeKey) {
-        return (speciesTypeKey== SpeciesType.HUMAN ? "HGNC:" : "VGNC:") + hgncId;
-    }
 }

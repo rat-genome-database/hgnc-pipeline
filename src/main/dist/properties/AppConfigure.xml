@@ -6,10 +6,14 @@
     </bean>
 
     <bean id="hgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.HgncIdManager">
-        <property name="version" value="HgncIdManager  -- build Jan 20, 2025" />
+        <property name="version" value="HgncIdManager  -- build Jan 27, 2025" />
         <property name="hgncIdFile" value="https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt"/>
+
+        <property name="vgncIdFile" value="https://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/vgnc_gene_set_All.txt.gz"/>
+        <!-- old files that stopped being updated -->
         <property name="dogVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/dog/dog_vgnc_gene_set_All.txt"/>
         <property name="pigVgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/pig/pig_vgnc_gene_set_All.txt"/>
+
         <property name="refKey" value="133851" />
     </bean>
 

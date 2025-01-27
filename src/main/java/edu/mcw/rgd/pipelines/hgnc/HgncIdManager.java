@@ -18,6 +18,7 @@ import java.util.Map;
 public class HgncIdManager {
     private String version;
     private String hgncIdFile;
+    private String vgncIdFile;
     private String dogVgncIdFile;
     private String pigVgncIdFile;
     private int refKey;
@@ -28,6 +29,8 @@ public class HgncIdManager {
 
     static private final String NOMEN_SOURCE = "HGNC";
 
+    private boolean CLEAR_NOMEN_SOURCE_FOR_ORPHANS = false;
+
     public void run() throws Exception {
 
         long startTime = System.currentTimeMillis();
@@ -37,9 +40,8 @@ public class HgncIdManager {
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         logDb.info("   started at "+sdt.format(new Date(startTime)));
 
-        run(SpeciesType.HUMAN);
-        run(SpeciesType.DOG);
-        run(SpeciesType.PIG);
+        run( 0 );
+        run( SpeciesType.HUMAN );
 
         logDb.info("");
         logDb.info("=== OK ===      elapsed "+Utils.formatElapsedTime(System.currentTimeMillis(), startTime));
@@ -49,9 +51,14 @@ public class HgncIdManager {
 
         String speciesName = SpeciesType.getCommonName(speciesTypeKey);
 
-        List<HgncGene> hgncGenes = parseInputFile(speciesTypeKey);
+        List<HgncGene> hgncGenes;
+        if( speciesTypeKey == SpeciesType.HUMAN ) {
+            hgncGenes = parseHgncInputFile();
+        } else {
+            hgncGenes = parseVgncInputFile();
+        }
 
-        HashMap<Integer,List<HgncGene>> geneMap = qc(speciesTypeKey, hgncGenes);
+        HashMap<Integer,List<HgncGene>> geneMap = qc(hgncGenes);
 
         showMatchCounts(geneMap);
 
@@ -62,9 +69,9 @@ public class HgncIdManager {
 
             List<HgncGene> genes = geneMap.get(geneRgdId);
             if( genes.size()>1 ) {
-                String accIds = genes.get(0).getFullAcc(speciesTypeKey);
+                String accIds = genes.get(0).hgncId;
                 for( int i=1; i<genes.size(); i++ ) {
-                    accIds += ", " + genes.get(i).getFullAcc(speciesTypeKey);
+                    accIds += ", " + genes.get(i).hgncId;
                 }
                 logDb.warn("conflict: single gene RGD:"+geneRgdId+" matches multiple ids: "+accIds);
                 continue;
@@ -99,13 +106,19 @@ public class HgncIdManager {
         Set<Integer> orphanedRgdIdsWithHgncNomenSource = new HashSet<>(geneRgdIdsWithHgncNomenSource);
         orphanedRgdIdsWithHgncNomenSource.removeAll( geneMap.keySet() );
         logDb.info("   Orphaned RGD IDs with HGNC nomen source: "+orphanedRgdIdsWithHgncNomenSource.size() );
-        int counfOfNomenSourceCleared = 0;
-        for( Integer rgdId: orphanedRgdIdsWithHgncNomenSource ) {
-            if( dao.clearNomenSourceForGene(rgdId, NOMEN_SOURCE) ) {
-                counfOfNomenSourceCleared++;
+        if( CLEAR_NOMEN_SOURCE_FOR_ORPHANS ) {
+            int counfOfNomenSourceCleared = 0;
+            for (Integer rgdId : orphanedRgdIdsWithHgncNomenSource) {
+                if (dao.clearNomenSourceForGene(rgdId, NOMEN_SOURCE)) {
+                    counfOfNomenSourceCleared++;
+                }
+            }
+            logDb.info("   Orphaned RGD IDs with HGNC nomen source cleared (set to NULL): " + counfOfNomenSourceCleared);
+        } else {
+            if( orphanedRgdIdsWithHgncNomenSource.size()>0 ) {
+                logDb.info("   WARN! SUPPRESSED CLEARING OF NOMEN SOURCE FOR ORPHANS!");
             }
         }
-        logDb.info("   Orphaned RGD IDs with HGNC nomen source cleared (set to NULL): "+counfOfNomenSourceCleared );
     }
 
     void showMatchCounts( HashMap<Integer,List<HgncGene>> geneMap ) {
@@ -137,20 +150,18 @@ public class HgncIdManager {
         }
     }
 
-    public List<HgncGene> parseInputFile(int speciesTypeKey) throws Exception {
+    public List<HgncGene> parseHgncInputFile() throws Exception {
 
-        String speciesName = SpeciesType.getCommonName(speciesTypeKey);
+        String speciesName = SpeciesType.getCommonName(SpeciesType.HUMAN);
+        int humanTaxonId = SpeciesType.getTaxonomicId(SpeciesType.HUMAN);
+
         logDb.info("");
         logDb.info(speciesName.toUpperCase()+" HGNC file processing ...");
 
         FileDownloader downloader = new FileDownloader();
-        if(speciesTypeKey == SpeciesType.DOG)
-            downloader.setExternalFile(getDogVgncIdFile());
-        else if(speciesTypeKey == SpeciesType.PIG)
-            downloader.setExternalFile(getPigVgncIdFile());
-        else downloader.setExternalFile(getHgncIdFile());
+        downloader.setExternalFile(getHgncIdFile());
 
-        downloader.setLocalFile("data/"+speciesName+"_hgnc_ids.txt");
+        downloader.setLocalFile("data/hgnc_ids.txt");
         downloader.setPrependDateStamp(true);
         downloader.setUseCompression(true);
         String localFile = downloader.downloadNew();
@@ -164,11 +175,73 @@ public class HgncIdManager {
 
             String[] cols = line.split("[\\t]", -1);
             HgncGene hgncGene = new HgncGene();
-            hgncGene.hgncId = cols[0].substring(5).trim();
+            hgncGene.taxonId = humanTaxonId;
+            hgncGene.hgncId = cols[0].trim();
             hgncGene.symbol = cols[1].trim();
             hgncGene.name = cols[2].trim();
             hgncGene.ncbiId = cols[18].trim();
             hgncGene.ensemblId = cols[19].trim();
+
+            hgncGenes.add(hgncGene);
+        }
+
+        return hgncGenes;
+    }
+
+    public List<HgncGene> parseVgncInputFile() throws Exception {
+
+        logDb.info("");
+        logDb.info("VGNC file processing ...");
+
+        FileDownloader downloader = new FileDownloader();
+        downloader.setExternalFile(getVgncIdFile());
+
+        downloader.setLocalFile("data/vgnc_ids.txt");
+        downloader.setPrependDateStamp(true);
+        downloader.setUseCompression(true);
+        String localFile = downloader.downloadNew();
+
+        logDb.info("   file downloaded to "+localFile);
+
+        List<HgncGene> hgncGenes = new ArrayList<>();
+
+        Collection<String> dataLines = getUniqueDataLines(localFile);
+        for( String line: dataLines ) {
+
+            // columns in the file, as of Jan 2025
+            // 0. taxon_id
+            // 1. vgnc_id
+            // 2. symbol
+            // 3. name
+            // 4. locus_group
+            // 5. locus_type
+            // 6. status
+            // 7. location
+            // 8. location_sortable:
+            // 9. alias_symbol
+            // 10. alias_name
+            // 11. prev_symbol
+            // 12. prev_name
+            // 13. gene_family
+            // 14. gene_family_id
+            // 15. date_approved_reserved
+            // 16. date_symbol_changed
+            // 17. date_name_changed
+            // 18. date_modified
+            // 19. ncbi_id
+            // 20. ensembl_gene_id
+            // 21. uniprot_ids
+            // 22. pubmed_id
+            // 23. horde_id
+            // 24. hgnc_orthologs
+            String[] cols = line.split("[\\t]", -1);
+            HgncGene hgncGene = new HgncGene();
+            hgncGene.taxonId = Integer.parseInt(cols[0].trim());
+            hgncGene.hgncId = cols[1].trim();
+            hgncGene.symbol = cols[2].trim();
+            hgncGene.name = cols[3].trim();
+            hgncGene.ncbiId = cols[19].trim();
+            hgncGene.ensemblId = cols[20].trim();
 
             hgncGenes.add(hgncGene);
         }
@@ -197,44 +270,57 @@ public class HgncIdManager {
         return uniqueDataLines;
     }
 
-    HashMap<Integer,List<HgncGene>> qc(int speciesTypeKey, List<HgncGene> hgncGenes) throws Exception {
+    HashMap<Integer,List<HgncGene>> qc(List<HgncGene> hgncGenes) throws Exception {
 
         HashMap<Integer, List<HgncGene>> resultMap = new HashMap<>();
 
-        String speciesName = SpeciesType.getCommonName(speciesTypeKey);
+        Map<Integer, Integer> taxonId2SpeciesTypeKeyMap = new HashMap<>();
+        for( int sp: SpeciesType.getSpeciesTypeKeys() ) {
+            if( SpeciesType.isSearchable(sp) ) {
+                taxonId2SpeciesTypeKeyMap.put( SpeciesType.getTaxonomicId(sp), sp );
+            }
+        }
+        Map<Integer, Integer> speciesTypeKeyCounts = new HashMap<>();
 
+        int nonRgdSpecies = 0;
         int conflictCount = 0;
 
         for( HgncGene g: hgncGenes ) {
 
-            String acc = g.getFullAcc(speciesTypeKey);
+            Integer sp = taxonId2SpeciesTypeKeyMap.get(g.taxonId);
+            if( sp != null ) {
+                g.speciesTypeKey = sp;
+            } else {
+                nonRgdSpecies++;
+                continue;
+            }
 
             g.matchBy = "";
             List<Gene> existingGenes;
-            if( speciesTypeKey==SpeciesType.HUMAN ) {
-                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, acc);
+            if( g.speciesTypeKey==SpeciesType.HUMAN ) {
+                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_HGNC, g.hgncId);
             } else {
-                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_VGNC, acc);
+                existingGenes = dao.getActiveGenesByXdbId(XdbId.XDB_KEY_VGNC, g.hgncId);
             }
             if( existingGenes.size() == 1 ) {
-                g.matchBy = "match tier 1, by "+acc;
+                g.matchBy = "match tier 1, by "+g.hgncId;
             } else {
                 if( g.ncbiId != null ) {
                     existingGenes = dao.getActiveGenesByNcbiId(g.ncbiId);
                     if( existingGenes.size()==1 ) {
-                        g.matchBy = "match tier 2, by NCBI:"+g.ncbiId+" ("+acc+")";
+                        g.matchBy = "match tier 2, by NCBI:"+g.ncbiId+" ("+g.hgncId+")";
                     }
                 }
                 if( existingGenes.size() != 1 && g.ensemblId != null ) {
                     existingGenes = dao.getActiveGenesByEnsemblId(g.ensemblId);
                     if (existingGenes.size() == 1) {
-                        g.matchBy = "match tier 3, by ENSEMBL:" + g.ensemblId+" ("+acc+")";
+                        g.matchBy = "match tier 3, by ENSEMBL:" + g.ensemblId+" ("+g.hgncId+")";
                     }
                 }
             }
 
             if( existingGenes.size() != 1 ){
-                String msg = acc+" "+g.symbol+" ["+g.name+"]";
+                String msg = g.hgncId+" "+g.symbol+" ["+g.name+"]";
                 if( g.ncbiId!=null ) {
                     msg += " NCBI:"+g.ncbiId;
                 }
@@ -259,11 +345,24 @@ public class HgncIdManager {
                     resultMap.put(gene.getRgdId(), genes);
                 }
                 genes.add(g);
+
+                Integer count = speciesTypeKeyCounts.get(g.speciesTypeKey);
+                if( count == null ) {
+                    count = 1;
+                } else {
+                    count++;
+                }
+                speciesTypeKeyCounts.put( g.speciesTypeKey, count );
             }
         }
 
-        logDb.info("   Number of HGNC/VGNC ids in "+ speciesName+" the file: "+ hgncGenes.size());
-        logDb.info("      out of which "+conflictCount+" did not match a single gene in RGD");
+        logDb.info("   Lines with non-RGD species: "+nonRgdSpecies);
+        logDb.info("   Lines with RGD species that did not match a single gene in RGD: "+conflictCount);
+
+        for( Map.Entry<Integer, Integer> entry: speciesTypeKeyCounts.entrySet() ) {
+            String speciesName = SpeciesType.getCommonName(entry.getKey());
+            logDb.info("   Lines for species  "+speciesName+": "+entry.getValue());
+        }
 
         return resultMap;
     }
@@ -337,6 +436,14 @@ public class HgncIdManager {
 
     public void setPigVgncIdFile(String pigVgncIdFile) {
         this.pigVgncIdFile = pigVgncIdFile;
+    }
+
+    public String getVgncIdFile() {
+        return vgncIdFile;
+    }
+
+    public void setVgncIdFile(String vgncIdFile) {
+        this.vgncIdFile = vgncIdFile;
     }
 
     public int getRefKey() {
