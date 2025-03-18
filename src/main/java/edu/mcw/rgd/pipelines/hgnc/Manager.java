@@ -22,25 +22,22 @@ public class Manager {
 
         try {
             // process cmdline params
-            for( int i=0; i<args.length; i++ ) {
-                switch(args[i]) {
-                    case "--processObsoleteHgncIds": {
+            for( String arg : args ) {
+                switch (arg) {
+                    case "--processObsoleteHgncIds" -> {
                         ObsoleteHgncIdManager manager = (ObsoleteHgncIdManager) (bf.getBean("obsoleteHgncIdManager"));
                         logger = manager.logDb;
                         manager.run();
-                        break;
                     }
-                    case "--processHgncIds": {
+                    case "--processHgncIds" -> {
                         HgncIdManager manager = (HgncIdManager) (bf.getBean("hgncIdManager"));
                         logger = manager.logDb;
                         manager.run();
-                        break;
                     }
-                    case "--processMgiData": {
-                        MgiManager manager = (MgiManager) (bf.getBean( "MgiManager"));
+                    case "--processMgiData" -> {
+                        MgiManager manager = (MgiManager) (bf.getBean("MgiManager"));
                         logger = manager.logger;
                         manager.run();
-                        break;
                     }
                 }
             }

@@ -1,3 +1,6 @@
+Mar 18, 2025
+  obsolete hgnc ids: updated the source file
+
 Jan 27, 2025
   vgnc pipeline: switched to all-species file (previous files stopped being updated what was causing problems)
 
