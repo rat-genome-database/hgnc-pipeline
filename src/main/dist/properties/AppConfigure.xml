@@ -1,7 +1,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
     <bean id="obsoleteHgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.ObsoleteHgncIdManager">
-        <property name="version" value="ObsoleteHgncIdManager  -- build Mar 18, 2025" />
+        <property name="version" value="ObsoleteHgncIdManager  -- build Jun 03, 2025" />
         <property name="obsoleteHgncIdFile" value="ftp://ftp.ebi.ac.uk/pub/databases/genenames/out_of_date_hgnc/tsv/withdrawn.txt"/>
     </bean>
 
