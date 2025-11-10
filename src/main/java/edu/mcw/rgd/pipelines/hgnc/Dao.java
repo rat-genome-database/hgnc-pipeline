@@ -28,6 +28,7 @@ import java.util.Set;
  */
 public class Dao extends AbstractDAO{
 
+    private boolean readOnlyMode = false;
     private XdbIdDAO xdbIdDAO = new XdbIdDAO();
     private NomenclatureDAO nomenclatureDAO = new NomenclatureDAO();
     private AliasDAO aliasDAO = new AliasDAO();
@@ -57,6 +58,10 @@ public class Dao extends AbstractDAO{
 
     public boolean clearNomenSourceForGene( int geneRgdId, String oldNomenSource ) throws Exception {
 
+        if( isReadOnlyMode() ) {
+            return true;
+        }
+
         String sql = "UPDATE genes SET nomen_source=NULL WHERE rgd_id=? AND nomen_source=?";
         int r = geneDAO.update(sql, geneRgdId, oldNomenSource);
         if( r!=0 ) {
@@ -74,6 +79,9 @@ public class Dao extends AbstractDAO{
      * @throws Exception when something went wrong in spring framework
      */
     public int updateByKey(XdbId xdbId) throws Exception {
+        if( isReadOnlyMode() ) {
+            return 1;
+        }
         return xdbIdDAO.updateByKey(xdbId);
     }
 
@@ -84,6 +92,10 @@ public class Dao extends AbstractDAO{
      * @throws Exception when something went wrong in spring framework
      */
     public int deleteXdbId(XdbId xdbId) throws Exception {
+        if( isReadOnlyMode() ) {
+            return 1;
+        }
+
         List<XdbId> xdbIds = new ArrayList<>(1);
         xdbIds.add(xdbId);
         return xdbIdDAO.deleteXdbIds(xdbIds);
@@ -94,29 +106,32 @@ public class Dao extends AbstractDAO{
     }
 
     public void insertNomenclatureEvent(NomenclatureEvent event) throws Exception {
-        nomenclatureDAO.createNomenEvent(event);
-        logNomenEvents.info("INSERTED "
-            +" KEY:"+event.getNomenEventKey()
-            +" REF_KEY:"+event.getRefKey()
-            +" EVENT_DATE:"+new Timestamp(event.getEventDate().getTime()).toString()
-            +" STATUS:"+event.getNomenStatusType()
-            +" DESC:"+event.getDesc()
-            +" RGD:"+event.getRgdId()
-            +" SYMBOL:"+event.getSymbol()
-            +" NAME:"+event.getName()
-            +" OLD_RGD:"+event.getOriginalRGDId()
-            +" OLD_SYMBOL:"+event.getPreviousSymbol()
-            +" OLD_NAME:"+event.getPreviousName()
-            +" NOTES:"+event.getNotes()
+        if( !isReadOnlyMode() ) {
+            nomenclatureDAO.createNomenEvent(event);
+        }
+        logNomenEvents.info("INSERTED"
+            +"\n KEY:"+event.getNomenEventKey()
+            +"\n REF_KEY:"+event.getRefKey()
+            +"\n EVENT_DATE:"+new Timestamp(event.getEventDate().getTime()).toString()
+            +"\n STATUS:"+event.getNomenStatusType()
+            +"\n DESC:"+event.getDesc()
+            +"\n RGD:"+event.getRgdId()+"   OLD_RGD:"+event.getOriginalRGDId()
+            +"\n SYMBOL:["+event.getSymbol()+"]   OLD_SYMBOL:["+event.getPreviousSymbol()+"]"
+            +"\n NAME:["+event.getName()+"]   OLD_NAME:["+event.getPreviousName()+"]"
+            +"\n NOTES:"+event.getNotes()
         +"");
     }
 
     public void updateGene(Gene gene) throws Exception {
-        geneDAO.updateGene(gene);
+        if( !isReadOnlyMode() ) {
+            geneDAO.updateGene(gene);
+        }
     }
 
     public void insertAlias(Alias alias) throws Exception {
-        aliasDAO.insertAlias(alias);
+        if( !isReadOnlyMode() ) {
+            aliasDAO.insertAlias(alias);
+        }
         logAliases.debug("INSERT "+alias.dump("|"));
     }
 
@@ -160,13 +175,27 @@ public class Dao extends AbstractDAO{
 
     public void insertObsoleteHgncId(String obsoleteHgncId, String status, String withdrawnSymbol, String mergedIntoReport) throws Exception {
 
+        if( isReadOnlyMode() ) {
+            return;
+        }
         String sql = "INSERT INTO obsolete_hgnc_ids (hgnc_id,status,withdrawn_symbol,merged_into_report) VALUES(?,?,?,?)";
         xdbIdDAO.update(sql, obsoleteHgncId, status, withdrawnSymbol, mergedIntoReport);
     }
 
     public void updateObsoleteHgncId(String obsoleteHgncId, String status, String withdrawnSymbol, String mergedIntoReport) throws Exception {
 
+        if( isReadOnlyMode() ) {
+            return;
+        }
         String sql = "UPDATE obsolete_hgnc_ids SET last_modified_date=SYSDATE,status=?,withdrawn_symbol=?,merged_into_report=? WHERE hgnc_id=?";
         xdbIdDAO.update(sql, status, withdrawnSymbol, mergedIntoReport, obsoleteHgncId);
+    }
+
+    public boolean isReadOnlyMode() {
+        return readOnlyMode;
+    }
+
+    public void setReadOnlyMode(boolean readOnlyMode) {
+        this.readOnlyMode = readOnlyMode;
     }
 }

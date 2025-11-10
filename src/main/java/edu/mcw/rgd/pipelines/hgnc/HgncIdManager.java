@@ -22,7 +22,7 @@ public class HgncIdManager {
     private String dogVgncIdFile;
     private String pigVgncIdFile;
     private int refKey;
-    private final Dao dao = new Dao();
+    private Dao dao;
     Logger logDb = LogManager.getLogger("hgnc_ids");
     Logger logNoMatch = LogManager.getLogger("no_match");
     Logger logMultiMatch = LogManager.getLogger("multi_match");
@@ -31,7 +31,9 @@ public class HgncIdManager {
 
     private boolean CLEAR_NOMEN_SOURCE_FOR_ORPHANS = false;
 
-    public void run() throws Exception {
+    public void run( Dao dao ) throws Exception {
+
+        this.dao = dao;
 
         long startTime = System.currentTimeMillis();
 
@@ -39,6 +41,10 @@ public class HgncIdManager {
         logDb.info("   "+dao.getConnectionInfo());
         SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         logDb.info("   started at "+sdt.format(new Date(startTime)));
+
+        if( dao.isReadOnlyMode() ) {
+            logDb.warn("WARNING! dao operations are performed in read-only mode");
+        }
 
         run( 0 );
         run( SpeciesType.HUMAN );

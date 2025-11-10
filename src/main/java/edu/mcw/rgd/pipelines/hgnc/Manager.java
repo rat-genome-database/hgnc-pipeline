@@ -20,6 +20,20 @@ public class Manager {
 
         Logger logger = null;
 
+        boolean readOnlyMode = false;
+        // preprocess cmdline params
+        for( String arg : args ) {
+            switch (arg) {
+                case "--readOnlyMode" -> {
+                    readOnlyMode = true;
+                }
+            }
+        }
+        Dao dao = new Dao();
+        if( readOnlyMode ) {
+            dao.setReadOnlyMode(true);
+        }
+
         try {
             // process cmdline params
             for( String arg : args ) {
@@ -32,7 +46,7 @@ public class Manager {
                     case "--processHgncIds" -> {
                         HgncIdManager manager = (HgncIdManager) (bf.getBean("hgncIdManager"));
                         logger = manager.logDb;
-                        manager.run();
+                        manager.run(dao);
                     }
                     case "--processMgiData" -> {
                         MgiManager manager = (MgiManager) (bf.getBean("MgiManager"));

@@ -6,7 +6,7 @@
     </bean>
 
     <bean id="hgncIdManager" class="edu.mcw.rgd.pipelines.hgnc.HgncIdManager">
-        <property name="version" value="HgncIdManager  -- build Jan 27, 2025" />
+        <property name="version" value="HgncIdManager  -- build Nov 10, 2025" />
         <property name="hgncIdFile" value="https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt"/>
 
         <property name="vgncIdFile" value="https://ftp.ebi.ac.uk/pub/databases/genenames/vgnc/tsv/vgnc_gene_set_All.txt.gz"/>
