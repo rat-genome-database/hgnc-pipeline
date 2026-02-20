@@ -219,6 +219,38 @@ public class Dao extends AbstractDAO{
         logGeneFamilies.debug("UPDATE NEW " + incoming.dump("|"));
     }
 
+    /// gene-to-family mapping methods ///
+
+    public Set<String> getAllGeneFamilyMappings() throws Exception {
+        String sql = "SELECT hgnc_id, family_id FROM hgnc_family_to_genes";
+        Set<String> mappings = new HashSet<>();
+        try (java.sql.Connection conn = getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                mappings.add(rs.getString(1) + "|" + rs.getInt(2));
+            }
+        }
+        logGeneFamilies.info("gene-to-family mappings loaded from database: " + mappings.size());
+        return mappings;
+    }
+
+    public void insertGeneFamilyMapping(String hgncId, int familyId) throws Exception {
+        if (!isReadOnlyMode()) {
+            String sql = "INSERT INTO hgnc_family_to_genes (hgnc_id, family_id) VALUES (?, ?)";
+            update(sql, hgncId, familyId);
+        }
+        logGeneFamilies.debug("INSERT gene-family hgnc_id=" + hgncId + " family_id=" + familyId);
+    }
+
+    public void deleteGeneFamilyMapping(String hgncId, int familyId) throws Exception {
+        if (!isReadOnlyMode()) {
+            String sql = "DELETE FROM hgnc_family_to_genes WHERE hgnc_id=? AND family_id=?";
+            update(sql, hgncId, familyId);
+        }
+        logGeneFamilies.debug("DELETE gene-family hgnc_id=" + hgncId + " family_id=" + familyId);
+    }
+
     public boolean isReadOnlyMode() {
         return readOnlyMode;
     }

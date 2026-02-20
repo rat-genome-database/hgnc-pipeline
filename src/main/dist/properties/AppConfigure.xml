@@ -27,6 +27,6 @@
     <bean id="geneFamilyLoader" class="edu.mcw.rgd.pipelines.hgnc.GeneFamilyLoader">
         <property name="version" value="gene-family-loader  -- build Feb 20, 2026"/>
         <property name="familyFile" value="https://storage.googleapis.com/public-download-files/hgnc/csv/csv/genefamily_db_tables/family.csv"/>
-
+        <property name="geneHasFamilyFile" value="https://storage.googleapis.com/public-download-files/hgnc/csv/csv/genefamily_db_tables/gene_has_family.csv"/>
     </bean>
 </beans>

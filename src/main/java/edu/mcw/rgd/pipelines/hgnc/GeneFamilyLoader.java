@@ -14,6 +14,7 @@ public class GeneFamilyLoader {
     Logger logger = LogManager.getLogger("gene_families");
     private String version;
     private String familyFile;
+    private String geneHasFamilyFile;
 
     private Dao dao = new Dao();
 
@@ -23,9 +24,19 @@ public class GeneFamilyLoader {
         logger.info(getVersion());
         logger.info("   " + dao.getConnectionInfo());
 
+        loadFamilies();
+        loadGeneFamilies();
+
+        logger.info("=== OK  time elapsed " + Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+        logger.info("");
+    }
+
+    void loadFamilies() throws Exception {
+
         FileDownloader fd = new FileDownloader();
         fd.setExternalFile(getFamilyFile());
         fd.setLocalFile("data/family.csv");
+        fd.setPrependDateStamp(true);
         fd.setUseCompression(true);
         String localFile = fd.downloadNew();
 
@@ -87,10 +98,62 @@ public class GeneFamilyLoader {
         logger.info("families updated: " + updated);
         logger.info("families up-to-date: " + upToDate);
         logger.info("families obsolete: " + obsolete);
+    }
 
-        long time1 = System.currentTimeMillis();
-        logger.info("=== OK  time elapsed " + Utils.formatElapsedTime(time0, time1));
-        logger.info("");
+    void loadGeneFamilies() throws Exception {
+
+        FileDownloader fd = new FileDownloader();
+        fd.setExternalFile(getGeneHasFamilyFile());
+        fd.setLocalFile("data/gene_has_family.csv");
+        fd.setPrependDateStamp(true);
+        fd.setUseCompression(true);
+        String localFile = fd.downloadNew();
+
+        // load all existing mappings from db
+        Set<String> dbMappings = dao.getAllGeneFamilyMappings();
+
+        // parse CSV and process each row
+        int inserted = 0;
+        int upToDate = 0;
+        Set<String> incomingMappings = new HashSet<>();
+
+        BufferedReader reader = Utils.openReader(localFile);
+        String line = reader.readLine(); // skip header line
+        while ((line = reader.readLine()) != null) {
+
+            List<String> cols = parseCsvLine(line);
+            if (cols.size() < 2) {
+                continue;
+            }
+
+            String hgncId = "HGNC:" + cols.get(0);
+            int familyId = Integer.parseInt(cols.get(1));
+            String key = hgncId + "|" + familyId;
+
+            incomingMappings.add(key);
+
+            if (!dbMappings.contains(key)) {
+                dao.insertGeneFamilyMapping(hgncId, familyId);
+                inserted++;
+            } else {
+                upToDate++;
+            }
+        }
+        reader.close();
+
+        // detect and delete obsolete mappings
+        int deleted = 0;
+        for (String dbKey : dbMappings) {
+            if (!incomingMappings.contains(dbKey)) {
+                String[] parts = dbKey.split("\\|");
+                dao.deleteGeneFamilyMapping(parts[0], Integer.parseInt(parts[1]));
+                deleted++;
+            }
+        }
+
+        logger.info("gene-family mappings inserted: " + inserted);
+        logger.info("gene-family mappings deleted: " + deleted);
+        logger.info("gene-family mappings up-to-date: " + upToDate);
     }
 
     boolean needsUpdate(HgncFamily db, HgncFamily incoming) {
@@ -165,5 +228,13 @@ public class GeneFamilyLoader {
 
     public void setFamilyFile(String familyFile) {
         this.familyFile = familyFile;
+    }
+
+    public String getGeneHasFamilyFile() {
+        return geneHasFamilyFile;
+    }
+
+    public void setGeneHasFamilyFile(String geneHasFamilyFile) {
+        this.geneHasFamilyFile = geneHasFamilyFile;
     }
 }
