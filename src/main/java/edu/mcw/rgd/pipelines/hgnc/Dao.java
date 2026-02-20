@@ -7,6 +7,7 @@ import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.HgncFamily;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
+import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
@@ -221,26 +222,54 @@ public class Dao extends AbstractDAO{
 
     /// gene-to-family mapping methods ///
 
-    public Set<String> getAllGeneFamilyMappings() throws Exception {
-        String sql = "SELECT hgnc_id, family_id FROM hgnc_family_to_genes";
-        Set<String> mappings = new HashSet<>();
+    /**
+     * load all HGNC id to gene RGD id mappings from RGD_ACC_XDB table
+     * @return map of HGNC accession id (e.g. "HGNC:123") to gene RGD id
+     */
+    public Map<String, Integer> getHgncIdToRgdIdMap() throws Exception {
+        List<XdbId> xdbIds = xdbIdDAO.getActiveXdbIds(XdbId.XDB_KEY_HGNC, RgdId.OBJECT_KEY_GENES);
+        Map<String, Integer> map = new HashMap<>();
+        for (XdbId x : xdbIds) {
+            map.put(x.getAccId(), x.getRgdId());
+        }
+        logGeneFamilies.info("HGNC-to-RGD-ID mappings loaded: " + map.size());
+        return map;
+    }
+
+    /**
+     * load all existing gene-to-family mappings from hgnc_family_to_genes table
+     * @return map of "hgnc_id|family_id" to rgd_id (null if not set)
+     */
+    public Map<String, Integer> getAllGeneFamilyMappings() throws Exception {
+        String sql = "SELECT hgnc_id, family_id, rgd_id FROM hgnc_family_to_genes";
+        Map<String, Integer> mappings = new HashMap<>();
         try (java.sql.Connection conn = getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql);
              java.sql.ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                mappings.add(rs.getString(1) + "|" + rs.getInt(2));
+                String key = rs.getString(1) + "|" + rs.getInt(2);
+                int rgdId = rs.getInt(3);
+                mappings.put(key, rs.wasNull() ? null : rgdId);
             }
         }
         logGeneFamilies.info("gene-to-family mappings loaded from database: " + mappings.size());
         return mappings;
     }
 
-    public void insertGeneFamilyMapping(String hgncId, int familyId) throws Exception {
+    public void insertGeneFamilyMapping(String hgncId, int familyId, Integer rgdId) throws Exception {
         if (!isReadOnlyMode()) {
-            String sql = "INSERT INTO hgnc_family_to_genes (hgnc_id, family_id) VALUES (?, ?)";
-            update(sql, hgncId, familyId);
+            String sql = "INSERT INTO hgnc_family_to_genes (hgnc_id, family_id, rgd_id) VALUES (?, ?, ?)";
+            update(sql, hgncId, familyId, rgdId);
         }
-        logGeneFamilies.debug("INSERT gene-family hgnc_id=" + hgncId + " family_id=" + familyId);
+        logGeneFamilies.debug("INSERT gene-family hgnc_id=" + hgncId + " family_id=" + familyId + " rgd_id=" + rgdId);
+    }
+
+    public void updateGeneFamilyRgdId(String hgncId, int familyId, Integer rgdId) throws Exception {
+        if (!isReadOnlyMode()) {
+            String sql = "UPDATE hgnc_family_to_genes SET rgd_id=? WHERE hgnc_id=? AND family_id=?";
+            update(sql, rgdId, hgncId, familyId);
+        }
+        logGeneFamilies.debug("UPDATE gene-family hgnc_id=" + hgncId + " family_id=" + familyId + " rgd_id=" + rgdId);
     }
 
     public void deleteGeneFamilyMapping(String hgncId, int familyId) throws Exception {

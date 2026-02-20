@@ -109,11 +109,15 @@ public class GeneFamilyLoader {
         fd.setUseCompression(true);
         String localFile = fd.downloadNew();
 
+        // load HGNC id to gene RGD id mappings
+        Map<String, Integer> hgncToRgdId = dao.getHgncIdToRgdIdMap();
+
         // load all existing mappings from db
-        Set<String> dbMappings = dao.getAllGeneFamilyMappings();
+        Map<String, Integer> dbMappings = dao.getAllGeneFamilyMappings();
 
         // parse CSV and process each row
         int inserted = 0;
+        int updated = 0;
         int upToDate = 0;
         Set<String> incomingMappings = new HashSet<>();
 
@@ -129,21 +133,28 @@ public class GeneFamilyLoader {
             String hgncId = "HGNC:" + cols.get(0);
             int familyId = Integer.parseInt(cols.get(1));
             String key = hgncId + "|" + familyId;
+            Integer rgdId = hgncToRgdId.get(hgncId);
 
             incomingMappings.add(key);
 
-            if (!dbMappings.contains(key)) {
-                dao.insertGeneFamilyMapping(hgncId, familyId);
+            if (!dbMappings.containsKey(key)) {
+                dao.insertGeneFamilyMapping(hgncId, familyId, rgdId);
                 inserted++;
             } else {
-                upToDate++;
+                Integer dbRgdId = dbMappings.get(key);
+                if (!Objects.equals(dbRgdId, rgdId)) {
+                    dao.updateGeneFamilyRgdId(hgncId, familyId, rgdId);
+                    updated++;
+                } else {
+                    upToDate++;
+                }
             }
         }
         reader.close();
 
         // detect and delete obsolete mappings
         int deleted = 0;
-        for (String dbKey : dbMappings) {
+        for (String dbKey : dbMappings.keySet()) {
             if (!incomingMappings.contains(dbKey)) {
                 String[] parts = dbKey.split("\\|");
                 dao.deleteGeneFamilyMapping(parts[0], Integer.parseInt(parts[1]));
@@ -152,6 +163,7 @@ public class GeneFamilyLoader {
         }
 
         logger.info("gene-family mappings inserted: " + inserted);
+        logger.info("gene-family mappings updated: " + updated);
         logger.info("gene-family mappings deleted: " + deleted);
         logger.info("gene-family mappings up-to-date: " + upToDate);
     }
