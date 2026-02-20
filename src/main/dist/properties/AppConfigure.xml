@@ -23,4 +23,10 @@
         <property name="mgdXdbKey" value="5"/>
        <property name="refKey" value="134636" /> <!-- value="133851" for dev use-->
     </bean>
+
+    <bean id="geneFamilyLoader" class="edu.mcw.rgd.pipelines.hgnc.GeneFamilyLoader">
+        <property name="version" value="gene-family-loader  -- build Feb 20, 2026"/>
+        <property name="familyFile" value="https://storage.googleapis.com/public-download-files/hgnc/csv/csv/genefamily_db_tables/family.csv"/>
+
+    </bean>
 </beans>

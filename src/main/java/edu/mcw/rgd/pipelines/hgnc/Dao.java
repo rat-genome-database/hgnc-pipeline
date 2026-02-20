@@ -5,8 +5,10 @@ import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.HgncFamily;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.datamodel.XdbId;
+import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.jdbc.core.SqlParameter;
@@ -16,10 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author mtutaj
@@ -33,10 +32,12 @@ public class Dao extends AbstractDAO{
     private NomenclatureDAO nomenclatureDAO = new NomenclatureDAO();
     private AliasDAO aliasDAO = new AliasDAO();
     private GeneDAO geneDAO = new GeneDAO();
+    private HgncDAO hgncDAO = new HgncDAO();
 
     Logger logAliases = LogManager.getLogger("aliases");
     Logger logNomenEvents = LogManager.getLogger("nomen_events");
     Logger logNomenSource = LogManager.getLogger("nomen_source");
+    Logger logGeneFamilies = LogManager.getLogger("gene_families");
 
     /**
      * get active genes with given external id
@@ -189,6 +190,32 @@ public class Dao extends AbstractDAO{
         }
         String sql = "UPDATE obsolete_hgnc_ids SET last_modified_date=SYSDATE,status=?,withdrawn_symbol=?,merged_into_report=? WHERE hgnc_id=?";
         xdbIdDAO.update(sql, status, withdrawnSymbol, mergedIntoReport, obsoleteHgncId);
+    }
+
+    /// gene family methods ///
+
+    public Map<Integer, HgncFamily> getAllFamiliesAsMap() throws Exception {
+        List<HgncFamily> families = hgncDAO.getAllFamilies();
+        Map<Integer, HgncFamily> map = new HashMap<>();
+        for (HgncFamily f : families) {
+            map.put(f.getFamilyId(), f);
+        }
+        logGeneFamilies.info("families loaded from database: " + map.size());
+        return map;
+    }
+
+    public void insertFamily(HgncFamily f) throws Exception {
+        if (!isReadOnlyMode()) {
+            hgncDAO.insertFamily(f);
+        }
+        logGeneFamilies.debug("INSERT family_id=" + f.getFamilyId() + " [" + f.getAbbreviation() + "] " + f.getName());
+    }
+
+    public void updateFamily(HgncFamily f) throws Exception {
+        if (!isReadOnlyMode()) {
+            hgncDAO.updateFamily(f);
+        }
+        logGeneFamilies.debug("UPDATE family_id=" + f.getFamilyId() + " [" + f.getAbbreviation() + "] " + f.getName());
     }
 
     public boolean isReadOnlyMode() {

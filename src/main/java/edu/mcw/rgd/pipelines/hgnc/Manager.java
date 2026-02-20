@@ -53,6 +53,11 @@ public class Manager {
                         logger = manager.logger;
                         manager.run();
                     }
+                    case "--processGeneFamilies" -> {
+                        GeneFamilyLoader geneFamilyLoader = (GeneFamilyLoader) (bf.getBean("geneFamilyLoader"));
+                        logger = geneFamilyLoader.logger;
+                        geneFamilyLoader.run();
+                    }
                 }
             }
 
