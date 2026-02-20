@@ -66,7 +66,7 @@ public class GeneFamilyLoader {
                 dao.insertFamily(incoming);
                 inserted++;
             } else if (needsUpdate(existing, incoming)) {
-                dao.updateFamily(incoming);
+                dao.updateFamily(existing, incoming);
                 updated++;
             } else {
                 upToDate++;
@@ -78,7 +78,7 @@ public class GeneFamilyLoader {
         int obsolete = 0;
         for (HgncFamily f : familyMap.values()) {
             if (!incomingIds.contains(f.getFamilyId())) {
-                logger.debug("OBSOLETE family_id=" + f.getFamilyId() + " [" + f.getAbbreviation() + "] " + f.getName());
+                logger.debug("OBSOLETE " + f.dump("|"));
                 obsolete++;
             }
         }

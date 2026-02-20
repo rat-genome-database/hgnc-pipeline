@@ -208,14 +208,15 @@ public class Dao extends AbstractDAO{
         if (!isReadOnlyMode()) {
             hgncDAO.insertFamily(f);
         }
-        logGeneFamilies.debug("INSERT family_id=" + f.getFamilyId() + " [" + f.getAbbreviation() + "] " + f.getName());
+        logGeneFamilies.debug("INSERT " + f.dump("|"));
     }
 
-    public void updateFamily(HgncFamily f) throws Exception {
+    public void updateFamily(HgncFamily existing, HgncFamily incoming) throws Exception {
         if (!isReadOnlyMode()) {
-            hgncDAO.updateFamily(f);
+            hgncDAO.updateFamily(incoming);
         }
-        logGeneFamilies.debug("UPDATE family_id=" + f.getFamilyId() + " [" + f.getAbbreviation() + "] " + f.getName());
+        logGeneFamilies.debug("UPDATE OLD " + existing.dump("|"));
+        logGeneFamilies.debug("UPDATE NEW " + incoming.dump("|"));
     }
 
     public boolean isReadOnlyMode() {
