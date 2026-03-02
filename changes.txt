@@ -1,3 +1,6 @@
+Mar 02, 2026
+  gene family loader: updated README.md
+
 Feb 20, 2026
   gene family loader: implemented incremental loading of HGNC gene families into hgnc_family table
 

@@ -13,6 +13,10 @@ Post-processing: clears (sets to NULL) NOMEN_SOURCE field for those genes that o
 
 Updates nomenclature of mouse genes based on file from MGI.
 
+##Module 'Gene Family Loader'
+
+Downloads HGNC gene family definitions and gene-to-family membership CSV files, then synchronizes them with the RGD database by inserting new families and mappings, updating changed ones, and removing obsolete entries.
+
 ##Module 'Obsolete HGNC IDs'
 
 Handles obsolete HGNC IDs for human genes. The logic is:
