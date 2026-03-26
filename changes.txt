@@ -1,3 +1,6 @@
+Mar 26, 2026
+  added MemoryMonitor; updated dependencies
+
 Mar 02, 2026
   gene family loader: updated README.md
 

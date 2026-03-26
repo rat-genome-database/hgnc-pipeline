@@ -1,5 +1,6 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
+import edu.mcw.rgd.process.MemoryMonitor;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -33,6 +34,9 @@ public class Manager {
         if( readOnlyMode ) {
             dao.setReadOnlyMode(true);
         }
+
+        MemoryMonitor memoryMonitor = new MemoryMonitor();
+        memoryMonitor.start();
 
         try {
             // process cmdline params
@@ -68,6 +72,11 @@ public class Manager {
                 e.printStackTrace();
             }
             throw e;
+        } finally {
+            memoryMonitor.stop();
+            if( logger != null ) {
+                logger.info(memoryMonitor.getSummary());
+            }
         }
     }
 
