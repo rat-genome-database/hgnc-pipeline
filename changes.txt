@@ -1,5 +1,6 @@
 Apr 17, 2026
   updated VGNC download URL (old EBI FTP URL returns 404); updated dependencies
+  fixed duplicate VGNC ID conflicts caused by multi-location genes in new VGNC file format
 
 Mar 26, 2026
   added MemoryMonitor; updated dependencies

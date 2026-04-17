@@ -350,7 +350,17 @@ public class HgncIdManager {
                     genes = new ArrayList<>();
                     resultMap.put(gene.getRgdId(), genes);
                 }
-                genes.add(g);
+                // skip if same HGNC/VGNC ID already mapped to this gene
+                boolean alreadyMapped = false;
+                for( HgncGene existing: genes ) {
+                    if( Utils.stringsAreEqual(existing.hgncId, g.hgncId) ) {
+                        alreadyMapped = true;
+                        break;
+                    }
+                }
+                if( !alreadyMapped ) {
+                    genes.add(g);
+                }
 
                 Integer count = speciesTypeKeyCounts.get(g.speciesTypeKey);
                 if( count == null ) {
