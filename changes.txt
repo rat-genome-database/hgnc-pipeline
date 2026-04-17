@@ -1,3 +1,6 @@
+Apr 17, 2026
+  updated VGNC download URL (old EBI FTP URL returns 404); updated dependencies
+
 Mar 26, 2026
   added MemoryMonitor; updated dependencies
 
