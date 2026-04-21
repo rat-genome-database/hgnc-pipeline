@@ -201,7 +201,7 @@ public class Dao extends AbstractDAO{
         for (HgncFamily f : families) {
             map.put(f.getFamilyId(), f);
         }
-        logGeneFamilies.info("families loaded from database: " + map.size());
+        logGeneFamilies.info("families loaded from database: " + Utils.formatThousands(map.size()));
         return map;
     }
 
@@ -232,7 +232,7 @@ public class Dao extends AbstractDAO{
         for (XdbId x : xdbIds) {
             map.put(x.getAccId(), x.getRgdId());
         }
-        logGeneFamilies.info("HGNC-to-RGD-ID mappings loaded: " + map.size());
+        logGeneFamilies.info("HGNC-to-RGD-ID mappings loaded: " + Utils.formatThousands(map.size()));
         return map;
     }
 
@@ -252,7 +252,7 @@ public class Dao extends AbstractDAO{
                 mappings.put(key, rs.wasNull() ? null : rgdId);
             }
         }
-        logGeneFamilies.info("gene-to-family mappings loaded from database: " + mappings.size());
+        logGeneFamilies.info("gene-to-family mappings loaded from database: " + Utils.formatThousands(mappings.size()));
         return mappings;
     }
 

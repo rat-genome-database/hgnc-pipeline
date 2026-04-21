@@ -53,11 +53,11 @@ public class MgiManager {
 
         checkDatabase(allData);
         logger.info('\n');
-        logger.info("   Lines with MGI ids not in RGD: " + mgiNotInRgd);
-        logger.info("   Final amount that do not have a symbol: " + nullSymbol);
-        logger.info("   Nomen Events that changed: " + nomenEvents);
-        logger.info("   Total Conflicts found: " + conTotal);
-        logger.info("   Amount that have not changed: " + noChange);
+        logger.info("   Lines with MGI ids not in RGD: " + Utils.formatThousands(mgiNotInRgd));
+        logger.info("   Final amount that do not have a symbol: " + Utils.formatThousands(nullSymbol));
+        logger.info("   Nomen Events that changed: " + Utils.formatThousands(nomenEvents));
+        logger.info("   Total Conflicts found: " + Utils.formatThousands(conTotal));
+        logger.info("   Amount that have not changed: " + Utils.formatThousands(noChange));
     }
 
     String downloadMgiFile(String file) throws Exception{

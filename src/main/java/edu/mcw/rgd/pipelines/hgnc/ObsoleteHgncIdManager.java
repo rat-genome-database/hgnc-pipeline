@@ -78,15 +78,15 @@ public class ObsoleteHgncIdManager {
         }
         reader.close();
 
-        logDb.info("Processed obsolete HGNC ids: "+obsoleteHgncIdsProcessed);
-        logDb.info(" -- withdrawn HGNC ids: "+withdrawnHgncIdsProcessed);
-        logDb.info(" -- merged HGNC ids: "+mergedHgncIdsProcessed);
+        logDb.info("Processed obsolete HGNC ids: "+Utils.formatThousands(obsoleteHgncIdsProcessed));
+        logDb.info(" -- withdrawn HGNC ids: "+Utils.formatThousands(withdrawnHgncIdsProcessed));
+        logDb.info(" -- merged HGNC ids: "+Utils.formatThousands(mergedHgncIdsProcessed));
 
         if( hgncIdsDeletedInRgd!=0 ) {
-            logDb.info("HGNC ID deleted from RGD db: " + hgncIdsDeletedInRgd);
+            logDb.info("HGNC ID deleted from RGD db: " + Utils.formatThousands(hgncIdsDeletedInRgd));
         }
         if( hgncIdsReplacedInRgd!=0 ) {
-            logDb.info("HGNC ID replaced in RGD db: " + hgncIdsReplacedInRgd);
+            logDb.info("HGNC ID replaced in RGD db: " + Utils.formatThousands(hgncIdsReplacedInRgd));
         }
         logDb.info("Processing of obsolete HGNC ids complete: "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
     }

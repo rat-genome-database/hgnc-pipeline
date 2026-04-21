@@ -1,3 +1,6 @@
+Apr 21, 2026
+  format logged numbers with thousands separators; updated dependencies
+
 Apr 17, 2026
   updated VGNC download URL (old EBI FTP URL returns 404); updated dependencies
   fixed duplicate VGNC ID conflicts caused by multi-location genes in new VGNC file format

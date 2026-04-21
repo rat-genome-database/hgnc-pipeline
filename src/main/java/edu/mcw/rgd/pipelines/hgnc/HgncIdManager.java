@@ -104,14 +104,14 @@ public class HgncIdManager {
             genesModified++;
         }
 
-        logDb.info("   Number of "+ speciesName+" Genes Updated: "+ genesModified);
-        logDb.info("   Number of "+ speciesName+" Nomen Events created: "+ nomenEvents);
+        logDb.info("   Number of "+ speciesName+" Genes Updated: "+ Utils.formatThousands(genesModified));
+        logDb.info("   Number of "+ speciesName+" Nomen Events created: "+ Utils.formatThousands(nomenEvents));
 
 
         Set<Integer> geneRgdIdsWithHgncNomenSource = dao.getGeneRgdIdsForNomenSource(speciesTypeKey, NOMEN_SOURCE);
         Set<Integer> orphanedRgdIdsWithHgncNomenSource = new HashSet<>(geneRgdIdsWithHgncNomenSource);
         orphanedRgdIdsWithHgncNomenSource.removeAll( geneMap.keySet() );
-        logDb.info("   Orphaned RGD IDs with HGNC nomen source: "+orphanedRgdIdsWithHgncNomenSource.size() );
+        logDb.info("   Orphaned RGD IDs with HGNC nomen source: "+Utils.formatThousands(orphanedRgdIdsWithHgncNomenSource.size()));
         if( CLEAR_NOMEN_SOURCE_FOR_ORPHANS ) {
             int counfOfNomenSourceCleared = 0;
             for (Integer rgdId : orphanedRgdIdsWithHgncNomenSource) {
@@ -119,7 +119,7 @@ public class HgncIdManager {
                     counfOfNomenSourceCleared++;
                 }
             }
-            logDb.info("   Orphaned RGD IDs with HGNC nomen source cleared (set to NULL): " + counfOfNomenSourceCleared);
+            logDb.info("   Orphaned RGD IDs with HGNC nomen source cleared (set to NULL): " + Utils.formatThousands(counfOfNomenSourceCleared));
         } else {
             if( orphanedRgdIdsWithHgncNomenSource.size()>0 ) {
                 logDb.info("   WARN! SUPPRESSED CLEARING OF NOMEN SOURCE FOR ORPHANS!");
@@ -152,7 +152,7 @@ public class HgncIdManager {
         }
 
         for( Map.Entry<String, Integer> entry: matchCounts.entrySet() ) {
-            logDb.info("   "+entry.getKey()+": "+entry.getValue());
+            logDb.info("   "+entry.getKey()+": "+Utils.formatThousands(entry.getValue()));
         }
     }
 
@@ -271,7 +271,7 @@ public class HgncIdManager {
         reader.close();
 
         if( dataLinesRead != uniqueDataLines.size() ) {
-            logDb.info("  removed "+(dataLinesRead-uniqueDataLines.size())+" duplicate lines from input file");
+            logDb.info("  removed "+Utils.formatThousands(dataLinesRead-uniqueDataLines.size())+" duplicate lines from input file");
         }
         return uniqueDataLines;
     }
@@ -372,12 +372,12 @@ public class HgncIdManager {
             }
         }
 
-        logDb.info("   Lines with non-RGD species: "+nonRgdSpecies);
-        logDb.info("   Lines with RGD species that did not match a single gene in RGD: "+conflictCount);
+        logDb.info("   Lines with non-RGD species: "+Utils.formatThousands(nonRgdSpecies));
+        logDb.info("   Lines with RGD species that did not match a single gene in RGD: "+Utils.formatThousands(conflictCount));
 
         for( Map.Entry<Integer, Integer> entry: speciesTypeKeyCounts.entrySet() ) {
             String speciesName = SpeciesType.getCommonName(entry.getKey());
-            logDb.info("   Lines for species  "+speciesName+": "+entry.getValue());
+            logDb.info("   Lines for species  "+speciesName+": "+Utils.formatThousands(entry.getValue()));
         }
 
         return resultMap;

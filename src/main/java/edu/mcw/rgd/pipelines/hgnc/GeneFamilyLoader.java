@@ -94,10 +94,10 @@ public class GeneFamilyLoader {
             }
         }
 
-        logger.info("families inserted: " + inserted);
-        logger.info("families updated: " + updated);
-        logger.info("families up-to-date: " + upToDate);
-        logger.info("families obsolete: " + obsolete);
+        logger.info("families inserted: " + Utils.formatThousands(inserted));
+        logger.info("families updated: " + Utils.formatThousands(updated));
+        logger.info("families up-to-date: " + Utils.formatThousands(upToDate));
+        logger.info("families obsolete: " + Utils.formatThousands(obsolete));
     }
 
     void loadGeneFamilies() throws Exception {
@@ -162,10 +162,10 @@ public class GeneFamilyLoader {
             }
         }
 
-        logger.info("gene-family mappings inserted: " + inserted);
-        logger.info("gene-family mappings updated: " + updated);
-        logger.info("gene-family mappings deleted: " + deleted);
-        logger.info("gene-family mappings up-to-date: " + upToDate);
+        logger.info("gene-family mappings inserted: " + Utils.formatThousands(inserted));
+        logger.info("gene-family mappings updated: " + Utils.formatThousands(updated));
+        logger.info("gene-family mappings deleted: " + Utils.formatThousands(deleted));
+        logger.info("gene-family mappings up-to-date: " + Utils.formatThousands(upToDate));
     }
 
     boolean needsUpdate(HgncFamily db, HgncFamily incoming) {
