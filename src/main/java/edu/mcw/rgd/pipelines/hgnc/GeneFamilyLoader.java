@@ -1,7 +1,7 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
 import edu.mcw.rgd.datamodel.HgncFamily;
-import edu.mcw.rgd.process.FileDownloader;
+import edu.mcw.rgd.process.FileDownloader2;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +33,7 @@ public class GeneFamilyLoader {
 
     void loadFamilies() throws Exception {
 
-        FileDownloader fd = new FileDownloader();
+        FileDownloader2 fd = new FileDownloader2();
         fd.setExternalFile(getFamilyFile());
         fd.setLocalFile("data/family.csv");
         fd.setPrependDateStamp(true);
@@ -102,7 +102,7 @@ public class GeneFamilyLoader {
 
     void loadGeneFamilies() throws Exception {
 
-        FileDownloader fd = new FileDownloader();
+        FileDownloader2 fd = new FileDownloader2();
         fd.setExternalFile(getGeneHasFamilyFile());
         fd.setLocalFile("data/gene_has_family.csv");
         fd.setPrependDateStamp(true);

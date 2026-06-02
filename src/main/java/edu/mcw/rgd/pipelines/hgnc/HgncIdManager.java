@@ -1,7 +1,7 @@
 package edu.mcw.rgd.pipelines.hgnc;
 
 import edu.mcw.rgd.datamodel.*;
-import edu.mcw.rgd.process.FileDownloader;
+import edu.mcw.rgd.process.FileDownloader2;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,8 +19,6 @@ public class HgncIdManager {
     private String version;
     private String hgncIdFile;
     private String vgncIdFile;
-    private String dogVgncIdFile;
-    private String pigVgncIdFile;
     private int refKey;
     private Dao dao;
     Logger logDb = LogManager.getLogger("hgnc_ids");
@@ -164,7 +162,7 @@ public class HgncIdManager {
         logDb.info("");
         logDb.info(speciesName.toUpperCase()+" HGNC file processing ...");
 
-        FileDownloader downloader = new FileDownloader();
+        FileDownloader2 downloader = new FileDownloader2();
         downloader.setExternalFile(getHgncIdFile());
 
         downloader.setLocalFile("data/hgnc_ids.txt");
@@ -199,7 +197,7 @@ public class HgncIdManager {
         logDb.info("");
         logDb.info("VGNC file processing ...");
 
-        FileDownloader downloader = new FileDownloader();
+        FileDownloader2 downloader = new FileDownloader2();
         downloader.setExternalFile(getVgncIdFile());
 
         downloader.setLocalFile("data/vgnc_ids.txt");
@@ -436,22 +434,6 @@ public class HgncIdManager {
 
     public String getHgncIdFile() {
         return hgncIdFile;
-    }
-
-    public String getDogVgncIdFile() {
-        return dogVgncIdFile;
-    }
-
-    public void setDogVgncIdFile(String dogVgncIdFile) {
-        this.dogVgncIdFile = dogVgncIdFile;
-    }
-
-    public String getPigVgncIdFile() {
-        return pigVgncIdFile;
-    }
-
-    public void setPigVgncIdFile(String pigVgncIdFile) {
-        this.pigVgncIdFile = pigVgncIdFile;
     }
 
     public String getVgncIdFile() {

@@ -1,3 +1,6 @@
+Jun 2, 2026
+  switched to FileDownloader2 and dropped commons-net/httpclient deps; moved obsolete-HGNC and MGI source URLs off dead FTP/http to HTTPS; removed dead dog/pig VGNC config; updated dependencies
+
 Apr 21, 2026
   format logged numbers with thousands separators; updated dependencies
 

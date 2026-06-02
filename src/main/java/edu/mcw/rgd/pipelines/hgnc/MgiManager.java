@@ -3,7 +3,7 @@ package edu.mcw.rgd.pipelines.hgnc;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.NomenclatureEvent;
 import edu.mcw.rgd.datamodel.XdbId;
-import edu.mcw.rgd.process.FileDownloader;
+import edu.mcw.rgd.process.FileDownloader2;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -61,7 +61,7 @@ public class MgiManager {
     }
 
     String downloadMgiFile(String file) throws Exception{
-        FileDownloader downloader = new FileDownloader();
+        FileDownloader2 downloader = new FileDownloader2();
         downloader.setExternalFile(file);
         downloader.setLocalFile("data/MgiData.rpt");
         downloader.setUseCompression(true);
