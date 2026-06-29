@@ -45,7 +45,7 @@ public class Manager {
                     case "--processObsoleteHgncIds" -> {
                         ObsoleteHgncIdManager manager = (ObsoleteHgncIdManager) (bf.getBean("obsoleteHgncIdManager"));
                         logger = manager.logDb;
-                        manager.run();
+                        manager.run(dao);
                     }
                     case "--processHgncIds" -> {
                         HgncIdManager manager = (HgncIdManager) (bf.getBean("hgncIdManager"));
@@ -55,12 +55,12 @@ public class Manager {
                     case "--processMgiData" -> {
                         MgiManager manager = (MgiManager) (bf.getBean("MgiManager"));
                         logger = manager.logger;
-                        manager.run();
+                        manager.run(dao);
                     }
                     case "--processGeneFamilies" -> {
                         GeneFamilyLoader geneFamilyLoader = (GeneFamilyLoader) (bf.getBean("geneFamilyLoader"));
                         logger = geneFamilyLoader.logger;
-                        geneFamilyLoader.run();
+                        geneFamilyLoader.run(dao);
                     }
                 }
             }

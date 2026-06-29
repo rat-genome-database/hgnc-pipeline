@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class MgiManager {
-    Dao dao = new Dao();
+    Dao dao;
     String mgiDataFile;
     String version;
     int mgdXdbKey;
@@ -22,7 +22,8 @@ public class MgiManager {
     int nomenEvents = 0, nullSymbol = 0, mgiNotInRgd = 0, noChange = 0, conTotal = 0;
     Map<String,Gene> conflicts = new HashMap<>();
 
-    public void run() throws Exception {
+    public void run(Dao dao) throws Exception {
+        this.dao = dao;
         long startTime = System.currentTimeMillis();
 
         logger.info("");

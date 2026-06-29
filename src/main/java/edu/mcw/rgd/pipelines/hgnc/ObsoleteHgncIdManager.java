@@ -25,14 +25,16 @@ import java.util.List;
 public class ObsoleteHgncIdManager {
     private String version;
     private String obsoleteHgncIdFile;
-    private Dao dao = new Dao();
+    private Dao dao;
 
     int hgncIdsDeletedInRgd = 0;
     int hgncIdsReplacedInRgd = 0;
 
     Logger logDb = LogManager.getLogger("obsolete_hgnc_ids");
 
-    public void run() throws Exception {
+    public void run(Dao dao) throws Exception {
+
+        this.dao = dao;
 
         long time0 = System.currentTimeMillis();
 

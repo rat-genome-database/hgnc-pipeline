@@ -48,7 +48,7 @@ public class HgncIdManager {
         run( SpeciesType.HUMAN );
 
         logDb.info("");
-        logDb.info("=== OK ===      elapsed "+Utils.formatElapsedTime(System.currentTimeMillis(), startTime));
+        logDb.info("=== OK ===      elapsed "+Utils.formatElapsedTime(startTime, System.currentTimeMillis()));
     }
 
     public void run(int speciesTypeKey) throws Exception {
@@ -309,13 +309,13 @@ public class HgncIdManager {
             if( existingGenes.size() == 1 ) {
                 g.matchBy = "match tier 1, by "+g.hgncId;
             } else {
-                if( g.ncbiId != null ) {
+                if( !Utils.isStringEmpty(g.ncbiId) ) {
                     existingGenes = dao.getActiveGenesByNcbiId(g.ncbiId);
                     if( existingGenes.size()==1 ) {
                         g.matchBy = "match tier 2, by NCBI:"+g.ncbiId+" ("+g.hgncId+")";
                     }
                 }
-                if( existingGenes.size() != 1 && g.ensemblId != null ) {
+                if( existingGenes.size() != 1 && !Utils.isStringEmpty(g.ensemblId) ) {
                     existingGenes = dao.getActiveGenesByEnsemblId(g.ensemblId);
                     if (existingGenes.size() == 1) {
                         g.matchBy = "match tier 3, by ENSEMBL:" + g.ensemblId+" ("+g.hgncId+")";
@@ -325,10 +325,10 @@ public class HgncIdManager {
 
             if( existingGenes.size() != 1 ){
                 String msg = g.hgncId+" "+g.symbol+" ["+g.name+"]";
-                if( g.ncbiId!=null ) {
+                if( !Utils.isStringEmpty(g.ncbiId) ) {
                     msg += " NCBI:"+g.ncbiId;
                 }
-                if( g.ensemblId!=null ) {
+                if( !Utils.isStringEmpty(g.ensemblId) ) {
                     msg += " Ensembl:"+g.ensemblId;
                 }
                 if( existingGenes.isEmpty() ) {

@@ -16,9 +16,11 @@ public class GeneFamilyLoader {
     private String familyFile;
     private String geneHasFamilyFile;
 
-    private Dao dao = new Dao();
+    private Dao dao;
 
-    public void run() throws Exception {
+    public void run(Dao dao) throws Exception {
+
+        this.dao = dao;
 
         long time0 = System.currentTimeMillis();
         logger.info(getVersion());
