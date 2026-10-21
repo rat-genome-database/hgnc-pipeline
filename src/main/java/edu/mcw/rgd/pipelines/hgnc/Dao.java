@@ -189,7 +189,7 @@ public class Dao extends AbstractDAO{
         if( isReadOnlyMode() ) {
             return;
         }
-        String sql = "UPDATE obsolete_hgnc_ids SET last_modified_date=SYSDATE,status=?,withdrawn_symbol=?,merged_into_report=? WHERE hgnc_id=?";
+        String sql = "UPDATE obsolete_hgnc_ids SET last_modified_date=LOCALTIMESTAMP(0),status=?,withdrawn_symbol=?,merged_into_report=? WHERE hgnc_id=?";
         xdbIdDAO.update(sql, status, withdrawnSymbol, mergedIntoReport, obsoleteHgncId);
     }
 

@@ -1,3 +1,6 @@
+Oct 21, 2026
+  migrated to postgres; updated dependencies
+
 Jun 29, 2026
   honor --readOnlyMode in all steps (was only applied to the HGNC-id step); fixed elapsed-time logging; skip gene-match queries for empty NCBI/Ensembl ids; updated dependencies
 
